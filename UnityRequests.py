@@ -130,17 +130,6 @@ def measure_execution_time(func):
     execution_time = end_time - start_time
     print("Execution time: {:.2f} seconds".format(execution_time))
 
-# Define your policy configuration outside the class
-config = {
-    'queue_name_case_sensitivity': True,
-    'queue_name_max_length': 48,
-    'queue_name_min_length': 2,
-    'require_backup_queue': True,
-    'max_number_of_messages': 5000,
-    'max_message_length': 4194304,
-    'message_depth_warning_threshold': 0.9
-}
-
 
 report_service = MQSystemReport(base_url, username, password)
 report_service.generate_reports()
