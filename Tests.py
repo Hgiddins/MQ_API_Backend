@@ -4,13 +4,15 @@ import timeit
 import json
 from PolicyConfiguration import *
 
-client = MQ.Client(url="https://13.87.80.195:9443", qmgr="QM2", username="mqadmin", apikey = 'mqadmin')
+client = MQ.Client(url="https://13.87.80.195:9444", qmgr="QM1", username="admin", apikey = "passw0rd")
 
-
+# base_url = "https://13.87.80.195:9444"
+# username = "admin"
+# password = "passw0rd"
 def test():
 
 
-    queues = client.get_all_queue_managers()
+    queues = client.get_all_queues()
     # config = PolicyConfiguration( queue_name_max_length=5)
     for q in queues:
         print(q.to_dict())

@@ -1,7 +1,7 @@
 import requests
 import time
 
-flask_endpoint = "http://127.0.0.1:5000/"
+flask_endpoint = "https://127.0.0.1:5000/"
 
 # #
 base_url = "https://13.87.80.195:9444"
@@ -28,9 +28,9 @@ class MQSystemReport:
     def request_json(self, url, method="GET", data=None):
         try:
             if method == "GET":
-                response = requests.get(flask_endpoint + url)
+                response = requests.get(flask_endpoint + url,verify=False)
             elif method == "POST":
-                response = requests.post(flask_endpoint + url, json=data)
+                response = requests.post(flask_endpoint + url, json=data,verify=False)
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
@@ -42,7 +42,7 @@ class MQSystemReport:
 
     def fetch_all_queue_managers(self):
         try:
-            response = requests.get(flask_endpoint + "getallqueuemanagers")  # The endpoint to fetch all queue managers
+            response = requests.get(flask_endpoint + "getallqueuemanagers",verify=False)  # The endpoint to fetch all queue managers
             response.raise_for_status()
             return response.json().get('All_Queue_Managers', [])
         except requests.RequestException as e:
@@ -79,9 +79,9 @@ class QMgrSystemReport:
     def request_json(self, url, method="GET", data=None):
         try:
             if method == "GET":
-                response = requests.get(flask_endpoint + url)
+                response = requests.get(flask_endpoint + url,verify=False)
             elif method == "POST":
-                response = requests.post(flask_endpoint + url, json=data)
+                response = requests.post(flask_endpoint + url, json=data,verify=False)
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:

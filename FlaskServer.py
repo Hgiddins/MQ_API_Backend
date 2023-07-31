@@ -3,11 +3,11 @@ from flask_restful import Api, Resource
 from DependencyGraph import DependencyGraph
 from flask_caching import Cache
 import MQ
-from PolicyConfiguration import PolicyConfiguration
+
 
 
 client = None
-# client = MQ.Client(url=None, qmgr=None, username=None, apikey = None)
+# client = MQ.Client(url="https://13.87.80.195:9444", qmgr='QM2', username="admin", apikey = "passw0rd")
 
 
 app = Flask(__name__)
@@ -113,4 +113,5 @@ api.add_resource(GetDependencyGraph, '/getdependencygraph')
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run(debug=True, ssl_context=("cert.pem","key.pem"))
