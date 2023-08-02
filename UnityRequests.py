@@ -121,7 +121,6 @@ class QMgrSystemReport:
         self.get_all_channels()
         self.get_dependency_graph()
 
-
 def measure_execution_time(func):
     import time
     start_time = time.time()

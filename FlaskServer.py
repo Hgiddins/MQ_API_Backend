@@ -30,7 +30,12 @@ class ClientConfig(Resource):
 
         client = MQ.Client(url=data["url"], qmgr=data["qmgr"] if "qmgr" in data else None, username=data["username"], apikey=data["apikey"])
 
+        qmgr = cache.get('qmgr')
+        if qmgr is None:
+            qmgr = data["qmgr"]
+            cache.set('qmgr', qmgr)
         return {"message": "Client configuration updated successfully."}, 200
+
 
 
 class GetAllQueueManagers(Resource):
@@ -97,7 +102,7 @@ class GetDependencyGraph(Resource):
             cache.set('all_queues', queues)
 
         graph = DependencyGraph()
-        qmgr = 'QM1'
+        qmgr = cache.get('qmgr')
         graph.create_dependency_graph(queues, channels, applications, qmgr)
         graph_as_dicts = graph.to_dict()
         return {'Dependency Graph': graph_as_dicts}
