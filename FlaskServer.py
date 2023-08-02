@@ -7,6 +7,7 @@ import MQ
 
 
 client = None
+qmgr = None
 # client = MQ.Client(url="https://13.87.80.195:9444", qmgr='QM2', username="admin", apikey = "passw0rd")
 
 
@@ -19,6 +20,7 @@ cache = Cache(app, config={'CACHE_TYPE': 'simple', 'CACHE_DEFAULT_TIMEOUT': 10})
 class ClientConfig(Resource):
 
     def post(self):
+        global qmgr
         data = request.get_json()
 
         # Update global client details
@@ -30,10 +32,8 @@ class ClientConfig(Resource):
 
         client = MQ.Client(url=data["url"], qmgr=data["qmgr"] if "qmgr" in data else None, username=data["username"], apikey=data["apikey"])
 
-        qmgr = cache.get('qmgr')
-        if qmgr is None:
-            qmgr = data["qmgr"]
-            cache.set('qmgr', qmgr)
+        qmgr = data["qmgr"]
+
         return {"message": "Client configuration updated successfully."}, 200
 
 
@@ -86,6 +86,7 @@ class GetAllChannels(Resource):
 
 class GetDependencyGraph(Resource):
     def get(self):
+        global qmgr
         channels = cache.get('all_channels')
         if channels is None:
             channels = client.get_all_channels()
@@ -102,7 +103,6 @@ class GetDependencyGraph(Resource):
             cache.set('all_queues', queues)
 
         graph = DependencyGraph()
-        qmgr = cache.get('qmgr')
         graph.create_dependency_graph(queues, channels, applications, qmgr)
         graph_as_dicts = graph.to_dict()
         return {'Dependency Graph': graph_as_dicts}
