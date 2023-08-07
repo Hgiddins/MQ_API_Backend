@@ -297,7 +297,7 @@ class Parser:
             application = Application(
                 conn=conn,
                 channel=channel,
-                type='',
+                type=appltype,
                 conntag=conntag,
                 conname=conname,
                 connopts=connopts,
