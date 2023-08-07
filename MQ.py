@@ -186,22 +186,26 @@ class Parser:
             if queue_type == 'alias':
                 queue = AliasQueue()
                 queue.target_queue_name = queue_json['alias']['targetName']
+                queue.type_name = 'Alias'
             elif queue_type == 'remote':
                 queue = RemoteQueue()
                 queue.target_queue_name = queue_json['remote']['queueName']
                 queue.target_qmgr_name = queue_json['remote']['qmgrName']
                 queue.transmission_queue_name = queue_json['remote']['transmissionQueueName']
+                queue.type_name = 'Remote'
             elif queue_type == 'local':
                 if queue_json['general']['isTransmissionQueue']:
                     queue = TransmissionQueue()
                     queue.current_depth = queue_json['status']['currentDepth']
                     queue.open_input_count = queue_json['status']['openInputCount']
                     queue.open_output_count = queue_json['status']['openOutputCount']
+                    queue.type_name = 'Transmission'
                 else:
                     queue = LocalQueue()
                     queue.current_depth = queue_json['status']['currentDepth']
                     queue.open_input_count = queue_json['status']['openInputCount']
                     queue.open_output_count = queue_json['status']['openOutputCount']
+                    queue.type_name = 'Local'
             else:
                 continue
 
