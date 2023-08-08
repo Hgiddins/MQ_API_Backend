@@ -86,14 +86,14 @@ def boot_chatbot():
     return retrieval_chain, conversation_chain
 
 
-def get_error_message_chatbot_response(retrieval_chain, conversation_chain, error_information):
+def get_error_message_chatbot_response(retrieval_chain, conversation_chain, error_information, effacted_objects):
     # get relevant related information from the documentation
     context_prompt = "Provide relevant information about the causes and possible solutions to this issue: " + error_information
 
     documentation_context = retrieval_chain({"question": context_prompt})['answer']
 
     troubleshoot_prompt = """Given the provided context provided give an overview of the problem in my system and how to fix it : 
-    *System Event message:\n""" + error_information + "\n\nIBMMQ Documentation reference:\n"+documentation_context
+    *System Event message:\n""" + error_information + "\n\nAffacted MQ objects:\n" + effacted_objects + "\n\nIBMMQ Documentation reference:\n"+documentation_context
 
     result = conversation_chain.predict(input=troubleshoot_prompt)
 

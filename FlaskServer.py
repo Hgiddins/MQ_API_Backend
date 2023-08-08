@@ -3,13 +3,14 @@ from flask_restful import Api, Resource
 from MQ_REST_API.DependencyGraph import DependencyGraph
 from flask_caching import Cache
 import MQ_REST_API.MQ
-from ChatBot.ChatBot import boot_chatbot, get_error_message_chatbot_response
+from ChatBot.ChatBot import boot_chatbot, get_error_message_chatbot_response, get_general_chatbot_response
 
 
 # setting up server and cache
 app = Flask(__name__)
 api = Api(app)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+errorCache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 # global client, must first be posted to for MQ_REST_API to work
 client = None
@@ -36,6 +37,9 @@ class ClientConfig(Resource):
         client = MQ_REST_API.MQ.Client(url=data["url"], qmgr=data["qmgr"], username=data["username"], apikey=data["apikey"])
 
         cache.set('qmgr', data["qmgr"], timeout=5)
+        # print(client.get_qmgr())
+
+
 
         return {"message": "Client configuration updated successfully."}, 200
 
@@ -46,11 +50,11 @@ class ChatBotQuery(Resource):
         data = request.get_json()
 
         # Check if required fields are present
-        if not all(field in data for field in ["question", "indicator"]):
-            return {"message": "Missing required fields. Ensure 'question' and 'indicator' are provided."}, 400
+        if not all(field in data for field in ["question", "objects", "indicator"]):
+            return {"message": "Missing required fields. Ensure 'question', 'objects' and 'indicator' are provided."}, 400
 
         # Store the query details in the cache
-        cache.set('query', [data["question"], data["indicator"]])
+        cache.set('query', [data["question"], data["objects"], data["indicator"]])
 
         return {"message": "Query stored successfully."}, 200
 
@@ -59,17 +63,17 @@ class ChatBotQuery(Resource):
         if not query_details:
             return {"message": "No query found in cache."}, 404
 
-        question, indicator = query_details
+        question, objects, indicator = query_details
 
         if indicator == "systemMessage":
-            response = get_error_message_chatbot_response(retrieval_chain, conversation_chain, question)
+            response = get_error_message_chatbot_response(retrieval_chain, conversation_chain, question, objects)
             cache.delete('query')  # Clear the cache after processing the query
             return response
 
         elif indicator == "userMessage":
-            # Replace the following logic with what you want for 'userMessage'
+            response = get_general_chatbot_response(retrieval_chain, conversation_chain, question)
             cache.delete('query')  # Clear the cache after processing the query
-            return {"message": "User Message processing is not yet implemented."}, 501  # 501 means "Not Implemented"
+            return response
 
         else:
             return {"message": "Invalid indicator value."}, 400
@@ -155,4 +159,4 @@ api.add_resource(ChatBotQuery, '/chatbotquery')
 
 if __name__ == "__main__":
     # app.run(debug=True)
-    app.run(debug=True, ssl_context=("cert.pem","key.pem"))
+    app.run(debug=True, ssl_context=("cert.pem", "key.pem"), threaded = True)

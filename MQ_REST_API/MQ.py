@@ -44,7 +44,7 @@ class Client:
             return messages
         except requests.HTTPError as error:
             if error.response.status_code == 403:
-                print("Error 403: Forbidden. You do not have permission to access this resource.")
+                print("Error 403: Forbidden. You do not have permission to get messages")
                 return []
             else:
                 raise  # re-raise the exception if it's not a 403 error
@@ -74,6 +74,7 @@ class Client:
 
     def get_all_queues(self):
         response = self.get_request(f"/ibmmq/rest/v1/admin/qmgr/{self.qmgr}/queue?name=DEV*&attributes=*&status=*")
+        print('here',response)
         queue_json = json.loads(response)
         queues = Parser.parse_queue_response(queue_json)
         for q in queues:
@@ -266,7 +267,7 @@ class Parser:
     def parse_application_response(application_response_json):
         applications = []
         for application_json in application_response_json['commandResponse']:
-            print(application_json)
+
             conn = application_json['parameters']['conn']
             channel = application_json['parameters']['channel']
             appltype = application_json['parameters']['appltype']

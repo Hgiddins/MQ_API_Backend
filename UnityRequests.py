@@ -147,6 +147,7 @@ def post_chatbot_query_and_get_response(query, indicator):
     # Step 1: Post the query and indicator to the chatbot endpoint
     data = {
         "question": query,
+        "objects" : "None",
         "indicator": indicator
     }
     post_response = request_json("chatbotquery", method="POST", data=data)
@@ -175,10 +176,45 @@ def measure_execution_time(func):
 
 
 report_service = MQSystemReport(base_url, username, password)
-report_service.generate_reports()
+# report_service.generate_reports()
 def example_usage():
     response = post_chatbot_query_and_get_response("what is a 2035 error?", "systemMessage")
     print(response)
 
 # Measure execution time for the example usage
 # measure_execution_time(example_usage)
+
+import threading
+import time
+
+
+def chatbot_query():
+    response = post_chatbot_query_and_get_response("what is a 2035 error?", "systemMessage")
+    print(response)
+
+
+def generate_system_report():
+    for _ in range(5):  # Repeat 3 times
+        report_service.generate_reports()
+        time.sleep(10)  # Wait for 10 seconds between each report
+
+
+def example_usage():
+    # Start a new thread to handle the chatbot request
+    chatbot_thread = threading.Thread(target=chatbot_query)
+    chatbot_thread.start()
+
+    # Start a new thread to handle the MQ system report
+    system_report_thread = threading.Thread(target=generate_system_report)
+    system_report_thread.start()
+
+    # No need to wait for the chatbot thread in this function.
+    chatbot_thread.join()
+
+    # However, if you want to ensure that the main program doesn't exit until
+    # the system_report_thread is done, you can wait for it:
+    system_report_thread.join()
+
+
+# Now, execute the example usage
+example_usage()
