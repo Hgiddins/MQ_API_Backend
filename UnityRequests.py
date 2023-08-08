@@ -121,6 +121,50 @@ class QMgrSystemReport:
         self.get_all_channels()
         self.get_dependency_graph()
 
+
+import requests
+import time
+
+flask_endpoint = "https://127.0.0.1:5000/"
+
+
+def post_chatbot_query_and_get_response(query, indicator):
+    def request_json(url, method="GET", data=None):
+        try:
+            if method == "GET":
+                response = requests.get(flask_endpoint + url, verify=False)
+            elif method == "POST":
+                response = requests.post(flask_endpoint + url, json=data, verify=False)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            print(f"Failed to fetch data from {url}. Error: {e}")
+            return None
+        except ValueError:
+            print(f"Invalid JSON response from {url}")
+            return None
+
+    # Step 1: Post the query and indicator to the chatbot endpoint
+    data = {
+        "question": query,
+        "indicator": indicator
+    }
+    post_response = request_json("chatbotquery", method="POST", data=data)
+    print(post_response)
+
+    # Step 2: Upon confirmation, retrieve the chatbot response using a GET request
+    if post_response and post_response.get("message") == "Query stored successfully.":
+        time.sleep(1)  # Small delay to ensure server processes the query
+        print('requesting response from chatbot')
+        chatbot_response = request_json("chatbotquery")
+
+        # Step 3: Return the chatbot response
+        return chatbot_response
+
+    print("Failed to retrieve chatbot response.")
+    return None
+
+
 def measure_execution_time(func):
     import time
     start_time = time.time()
@@ -132,3 +176,9 @@ def measure_execution_time(func):
 
 report_service = MQSystemReport(base_url, username, password)
 report_service.generate_reports()
+def example_usage():
+    response = post_chatbot_query_and_get_response("what is a 2035 error?", "systemMessage")
+    print(response)
+
+# Measure execution time for the example usage
+# measure_execution_time(example_usage)

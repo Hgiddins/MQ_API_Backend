@@ -1,20 +1,23 @@
 from flask import Flask, request
 from flask_restful import Api, Resource
-from DependencyGraph import DependencyGraph
+from MQ_REST_API.DependencyGraph import DependencyGraph
 from flask_caching import Cache
-import MQ
+import MQ_REST_API.MQ
+from ChatBot.ChatBot import boot_chatbot, get_error_message_chatbot_response
 
 
-
-client = None
-qmgr = None
-# client = MQ.Client(url="https://13.87.80.195:9444", qmgr='QM2', username="admin", apikey = "passw0rd")
-
-
+# setting up server and cache
 app = Flask(__name__)
 api = Api(app)
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
-cache = Cache(app, config={'CACHE_TYPE': 'simple', 'CACHE_DEFAULT_TIMEOUT': 10})
+# global client, must first be posted to for MQ_REST_API to work
+client = None
+
+
+# Chat Bot connection and instantiation
+retrieval_chain, conversation_chain = boot_chatbot()
+
 
 
 class ClientConfig(Resource):
@@ -30,12 +33,46 @@ class ClientConfig(Resource):
         if not all(field in data for field in ["qmgr", "url", "username", "apikey"]):
             return {"message": "Missing required fields. Ensure 'url', 'username', and 'apikey' are provided."}, 400
 
-        client = MQ.Client(url=data["url"], qmgr=data["qmgr"] if "qmgr" in data else None, username=data["username"], apikey=data["apikey"])
+        client = MQ_REST_API.MQ.Client(url=data["url"], qmgr=data["qmgr"], username=data["username"], apikey=data["apikey"])
 
-        qmgr = data["qmgr"]
+        cache.set('qmgr', data["qmgr"], timeout=5)
 
         return {"message": "Client configuration updated successfully."}, 200
 
+
+class ChatBotQuery(Resource):
+
+    def post(self):
+        data = request.get_json()
+
+        # Check if required fields are present
+        if not all(field in data for field in ["question", "indicator"]):
+            return {"message": "Missing required fields. Ensure 'question' and 'indicator' are provided."}, 400
+
+        # Store the query details in the cache
+        cache.set('query', [data["question"], data["indicator"]])
+
+        return {"message": "Query stored successfully."}, 200
+
+    def get(self):
+        query_details = cache.get('query')
+        if not query_details:
+            return {"message": "No query found in cache."}, 404
+
+        question, indicator = query_details
+
+        if indicator == "systemMessage":
+            response = get_error_message_chatbot_response(retrieval_chain, conversation_chain, question)
+            cache.delete('query')  # Clear the cache after processing the query
+            return response
+
+        elif indicator == "userMessage":
+            # Replace the following logic with what you want for 'userMessage'
+            cache.delete('query')  # Clear the cache after processing the query
+            return {"message": "User Message processing is not yet implemented."}, 501  # 501 means "Not Implemented"
+
+        else:
+            return {"message": "Invalid indicator value."}, 400
 
 
 class GetAllQueueManagers(Resource):
@@ -44,7 +81,7 @@ class GetAllQueueManagers(Resource):
 
         if qmgrs is None:
             qmgrs = client.get_all_queue_managers()
-            cache.set('all_qmgrs', qmgrs)
+            cache.set('all_qmgrs', qmgrs, timeout=5)
 
         qmgrs_as_dicts = [qmgr.to_dict() for qmgr in qmgrs]
         return {'All_Queue_Managers': qmgrs_as_dicts}
@@ -56,7 +93,7 @@ class GetAllQueues(Resource):
 
         if queues is None:
             queues = client.get_all_queues()
-            cache.set('all_queues', queues)
+            cache.set('all_queues', queues, timeout=5)
 
         queues_as_dicts = [queue.to_dict() for queue in queues]
         return {'All_Queues': queues_as_dicts}
@@ -67,7 +104,7 @@ class GetAllApplications(Resource):
         applications = cache.get('all_applications')
         if applications is None:
             applications = client.get_all_applications()
-            cache.set('all_applications', applications)
+            cache.set('all_applications', applications, timeout=5)
 
         apps_as_dicts = [app.to_dict() for app in applications]
         return {'All_Applications': apps_as_dicts}
@@ -78,7 +115,7 @@ class GetAllChannels(Resource):
         channels = cache.get('all_channels')
         if channels is None:
             channels = client.get_all_channels()
-            cache.set('all_channels', channels)
+            cache.set('all_channels', channels, timeout=5)
 
         chs_as_dicts = [ch.to_dict() if hasattr(ch, 'to_dict') else 'Not a channel instance' for ch in channels]
         return {'All_Channels': chs_as_dicts}
@@ -86,21 +123,21 @@ class GetAllChannels(Resource):
 
 class GetDependencyGraph(Resource):
     def get(self):
-        global qmgr
+        qmgr = cache.get('qmgr')
         channels = cache.get('all_channels')
         if channels is None:
             channels = client.get_all_channels()
-            cache.set('all_channels', channels)
+            cache.set('all_channels', channels, timeout=5)
 
         applications = cache.get('all_applications')
         if applications is None:
             applications = client.get_all_applications()
-            cache.set('all_applications', applications)
+            cache.set('all_applications', applications, timeout=5)
 
         queues = cache.get('all_queues')
         if queues is None:
             queues = client.get_all_queues()
-            cache.set('all_queues', queues)
+            cache.set('all_queues', queues, timeout=5)
 
         graph = DependencyGraph()
         graph.create_dependency_graph(queues, channels, applications, qmgr)
@@ -114,8 +151,7 @@ api.add_resource(GetAllQueues, '/getallqueues')
 api.add_resource(GetAllApplications, '/getallapplications')
 api.add_resource(GetAllChannels, '/getallchannels')
 api.add_resource(GetDependencyGraph, '/getdependencygraph')
-
-
+api.add_resource(ChatBotQuery, '/chatbotquery')
 
 if __name__ == "__main__":
     # app.run(debug=True)

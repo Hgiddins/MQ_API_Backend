@@ -1,10 +1,6 @@
-from DependencyGraph import DependencyGraph
 import MQ
-import timeit
-import json
-from PolicyConfiguration import *
 
-client = MQ.Client(url="https://13.87.80.195:9444", qmgr="QM1", username="admin", apikey = "passw0rd")
+client = MQ.Client(url="https://13.87.80.195:9444", qmgr="QM1", username="admin", apikey ="passw0rd")
 
 # base_url = "https://13.87.80.195:9444"
 # username = "admin"

@@ -1,10 +1,10 @@
 import requests
 import json
-from Queues import RemoteQueue, TransmissionQueue, AliasQueue, LocalQueue
-from QMGR import QueueManager
-from Channel import SenderChannel, ReceiverChannel, ApplicationChannel
-from Messages import Message
-from Application import Application, ConnectedObject
+from MQ_REST_API.Queues import RemoteQueue, TransmissionQueue, AliasQueue, LocalQueue
+from MQ_REST_API.QMGR import QueueManager
+from MQ_REST_API.Channel import SenderChannel, ReceiverChannel, ApplicationChannel
+from MQ_REST_API.Messages import Message
+from MQ_REST_API.Application import Application, ConnectedObject
 
 
 class Client:
