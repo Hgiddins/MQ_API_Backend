@@ -74,15 +74,14 @@ class Client:
 
     def get_all_queues(self):
         response = self.get_request(f"/ibmmq/rest/v1/admin/qmgr/{self.qmgr}/queue?name=DEV*&attributes=*&status=*")
-        print('here',response)
         queue_json = json.loads(response)
         queues = Parser.parse_queue_response(queue_json)
-        for q in queues:
-            queue_messages = self.get_all_messages(q.queue_name)
-            queue_messages_content_and_id = [{'Message ID': message.message_id,
-                                              'Content': self.get_message_content(q.queue_name, message.message_id)}
-                                             for message in queue_messages]
-            q.messages = queue_messages_content_and_id
+        # for q in queues:
+        #     queue_messages = self.get_all_messages(q.queue_name)
+        #     queue_messages_content_and_id = [{'Message ID': message.message_id,
+        #                                       'Content': self.get_message_content(q.queue_name, message.message_id)}
+        #                                      for message in queue_messages]
+        #     q.messages = queue_messages_content_and_id
 
         return queues
 

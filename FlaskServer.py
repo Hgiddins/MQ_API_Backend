@@ -4,6 +4,10 @@ from MQ_REST_API.DependencyGraph import DependencyGraph
 from flask_caching import Cache
 import MQ_REST_API.MQ
 from ChatBot.ChatBot import boot_chatbot, get_error_message_chatbot_response, get_general_chatbot_response
+import urllib3
+
+# Suppress only the single InsecureRequestWarning from urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 # setting up server and cache
@@ -34,14 +38,23 @@ class ClientConfig(Resource):
         if not all(field in data for field in ["qmgr", "url", "username", "apikey"]):
             return {"message": "Missing required fields. Ensure 'url', 'username', and 'apikey' are provided."}, 400
 
-        client = MQ_REST_API.MQ.Client(url=data["url"], qmgr=data["qmgr"], username=data["username"], apikey=data["apikey"])
+        client = MQ_REST_API.MQ.Client(url=data["url"], qmgr=data["qmgr"], username=data["username"],
+                                       apikey=data["apikey"])
 
         cache.set('qmgr', data["qmgr"], timeout=5)
-        # print(client.get_qmgr())
 
+        try:
+            qmgr_state = client.get_qmgr().state
 
+            if qmgr_state == "running":
+                return {"message": "Login successful."}, 200
+            else:
+                return {"message": "Login failed, queue manager is not running."}, 400
 
-        return {"message": "Client configuration updated successfully."}, 200
+        except Exception as e:
+            # This is where you catch the exception related to qmgr not existing.
+            # You might want to catch a more specific exception than the general Exception
+            return {"message": f"Login failed, no queue manager named {data['qmgr']}."}, 400
 
 
 class ChatBotQuery(Resource):

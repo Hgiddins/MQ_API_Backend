@@ -1,62 +1,17 @@
 import requests
 import time
+import urllib3
+
+# Suppress only the single InsecureRequestWarning from urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 flask_endpoint = "https://127.0.0.1:5000/"
 
 # #
 base_url = "https://13.87.80.195:9443"
+qmgr = "QM"
 username = "admin"
 password = "passw0rd"
-
-
-class MQSystemReport:
-    def __init__(self, base_url, username, password):
-        self.base_url = base_url
-        self.username = username
-        self.password = password
-        self.post_client_config(url=base_url, qmgr=None, username=username, apikey=password)
-
-    def post_client_config(self, url, qmgr, username, apikey):
-        client_config = {
-            "url": url,
-            "qmgr": qmgr,
-            "username": username,
-            "apikey": apikey
-        }
-        self.request_json("clientconfig", method="POST", data=client_config)
-
-    def request_json(self, url, method="GET", data=None):
-        try:
-            if method == "GET":
-                response = requests.get(flask_endpoint + url,verify=False)
-            elif method == "POST":
-                response = requests.post(flask_endpoint + url, json=data,verify=False)
-            response.raise_for_status()
-            return response.json()
-        except requests.RequestException as e:
-            print(f"Failed to fetch data from {url}. Error: {e}")
-            return None
-        except ValueError:
-            print(f"Invalid JSON response from {url}")
-            return None
-
-    def fetch_all_queue_managers(self):
-        try:
-            response = requests.get(flask_endpoint + "getallqueuemanagers",verify=False)  # The endpoint to fetch all queue managers
-            response.raise_for_status()
-            return response.json().get('All_Queue_Managers', [])
-        except requests.RequestException as e:
-            print(f"Failed to fetch queue managers. Error: {e}")
-            return []
-
-    def generate_reports(self):
-        queue_managers = self.fetch_all_queue_managers()
-        for qmgr in queue_managers:
-            qmgr_name = qmgr.get('qmgr_name')
-            print(f"\nGenerating report for queue manager: {qmgr_name}")
-            qmgr_report = QMgrSystemReport(qmgr_name, self.base_url, self.username, self.password)
-            measure_execution_time(qmgr_report.generate_report)
-
 
 class QMgrSystemReport:
     def __init__(self, qmanager_name, base_url, username, password):
@@ -76,14 +31,23 @@ class QMgrSystemReport:
         }
         self.request_json("clientconfig", method="POST", data=client_config)
 
+
     def request_json(self, url, method="GET", data=None):
         try:
             if method == "GET":
-                response = requests.get(flask_endpoint + url,verify=False)
+                response = requests.get(flask_endpoint + url, verify=False)
             elif method == "POST":
-                response = requests.post(flask_endpoint + url, json=data,verify=False)
-            response.raise_for_status()
-            return response.json()
+                response = requests.post(flask_endpoint + url, json=data, verify=False)
+
+            # Check HTTP response status here
+            if response.status_code == 200:
+                return response.json()
+            elif response.status_code == 400:
+                print(f"Bad request to {url}. Response: {response.json()}")  # Print out the server response
+                return None
+            else:
+                print(f"Unexpected response from {url}. Status code: {response.status_code}")
+                return None
         except requests.RequestException as e:
             print(f"Failed to fetch data from {url}. Error: {e}")
             return None
@@ -116,19 +80,14 @@ class QMgrSystemReport:
             print('Dependency Graph', self.dependency_graph)
 
     def generate_report(self):
+        print('Generating report for ', qmgr, "\n")
         self.get_all_queues()
         self.get_all_applications()
         self.get_all_channels()
         self.get_dependency_graph()
 
 
-import requests
-import time
-
-flask_endpoint = "https://127.0.0.1:5000/"
-
-
-def post_chatbot_query_and_get_response(query, indicator):
+def post_chatbot_query_and_get_response(query, objects, indicator):
     def request_json(url, method="GET", data=None):
         try:
             if method == "GET":
@@ -147,7 +106,7 @@ def post_chatbot_query_and_get_response(query, indicator):
     # Step 1: Post the query and indicator to the chatbot endpoint
     data = {
         "question": query,
-        "objects" : "None",
+        "objects" : objects,
         "indicator": indicator
     }
     post_response = request_json("chatbotquery", method="POST", data=data)
@@ -175,46 +134,52 @@ def measure_execution_time(func):
     print("Execution time: {:.2f} seconds".format(execution_time))
 
 
-report_service = MQSystemReport(base_url, username, password)
-# report_service.generate_reports()
+report_service = QMgrSystemReport(qmanager_name= qmgr, base_url=base_url, username= username, password=password)
+report_service.generate_report()
 def example_usage():
-    response = post_chatbot_query_and_get_response("what is a 2035 error?", "systemMessage")
+    response = post_chatbot_query_and_get_response("what is a 2035 error?", 'None' "systemMessage")
     print(response)
 
 # Measure execution time for the example usage
 # measure_execution_time(example_usage)
 
-import threading
-import time
 
 
-def chatbot_query():
-    response = post_chatbot_query_and_get_response("what is a 2035 error?", "systemMessage")
-    print(response)
 
 
-def generate_system_report():
-    for _ in range(5):  # Repeat 3 times
-        report_service.generate_reports()
-        time.sleep(10)  # Wait for 10 seconds between each report
+# threded example>>>>>>
 
-
-def example_usage():
-    # Start a new thread to handle the chatbot request
-    chatbot_thread = threading.Thread(target=chatbot_query)
-    chatbot_thread.start()
-
-    # Start a new thread to handle the MQ system report
-    system_report_thread = threading.Thread(target=generate_system_report)
-    system_report_thread.start()
-
-    # No need to wait for the chatbot thread in this function.
-    chatbot_thread.join()
-
-    # However, if you want to ensure that the main program doesn't exit until
-    # the system_report_thread is done, you can wait for it:
-    system_report_thread.join()
-
-
-# Now, execute the example usage
-example_usage()
+# import threading
+# import time
+#
+#
+# def chatbot_query():
+#     response = post_chatbot_query_and_get_response("what is a 2035 error?", "systemMessage")
+#     print(response)
+#
+#
+# def generate_system_report():
+#     for _ in range(5):  # Repeat 3 times
+#         report_service.generate_reports()
+#         time.sleep(10)  # Wait for 10 seconds between each report
+#
+#
+# def example_usage():
+#     # Start a new thread to handle the chatbot request
+#     chatbot_thread = threading.Thread(target=chatbot_query)
+#     chatbot_thread.start()
+#
+#     # Start a new thread to handle the MQ system report
+#     system_report_thread = threading.Thread(target=generate_system_report)
+#     system_report_thread.start()
+#
+#     # No need to wait for the chatbot thread in this function.
+#     chatbot_thread.join()
+#
+#     # However, if you want to ensure that the main program doesn't exit until
+#     # the system_report_thread is done, you can wait for it:
+#     system_report_thread.join()
+#
+#
+# # Now, execute the example usage
+# example_usage()
