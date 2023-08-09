@@ -1,4 +1,4 @@
-from ChatBot.ChatBot import boot_chatbot, get_error_message_chatbot_response
+from ChatBot.MainChatBot import boot_chatbot, get_error_message_chatbot_response
 
 
 query = 'can you explain what a 2035 error is?'

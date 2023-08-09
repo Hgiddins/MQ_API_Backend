@@ -19,7 +19,7 @@ api = Api(app)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 # Insantiating threadsafe queue threshold configuration
-queueThresholds = QueueThresholdsConfig.QueueThresholdManager()
+queueThresholdManager = QueueThresholdsConfig.QueueThresholdManager()
 
 # Logging of errors - threadsafe
 errorList = ThreadsafeErrorList.ThreadSafeErrorList()
@@ -85,7 +85,7 @@ class QueueThresholdConfig(Resource):
             return {
                 "message": "Invalid threshold data. Ensure you provide a valid threshold (float) for each queue name."}, 400
 
-        queueThresholds.update(data)  # Update the thresholds using the manager
+        queueThresholdManager.update(data)  # Update the thresholds using the manager
 
         return {"message": "Thresholds updated successfully."}, 200
 
@@ -148,10 +148,11 @@ class GetAllQueues(Resource):
         queues_as_dicts = []
 
         for queue in queues:
+            currentQueueThreshold = queueThresholdManager.defaultThreshold
             # Checking for custom queue threshold using the manager
-            if queueThresholds.contains(queue.queue_name):
-                queue.threshold_limit = queueThresholds.get(queue.queue_name)
-            error_msg = queue.thresholdWarning()  # Call the thresholdWarning method of the Queue object
+            if queueThresholdManager.contains(queue.queue_name):
+                currentQueueThreshold = queueThresholdManager.get(queue.queue_name)
+            error_msg = queueThresholdManager.thresholdWarning(queue, currentQueueThreshold)  # Call the thresholdWarning method of the Queue object
             if error_msg:
                 errorList.add_error(error_msg)  # Directly add the error message to the global errorLog
             queues_as_dicts.append(queue.to_dict())
@@ -214,7 +215,7 @@ api.add_resource(GetAllApplications, '/getallapplications')
 api.add_resource(GetAllChannels, '/getallchannels')
 api.add_resource(GetDependencyGraph, '/getdependencygraph')
 api.add_resource(ChatBotQuery, '/chatbotquery')
-api.add_resource(QueueThresholdConfig, '/queuethresholds')
+api.add_resource(QueueThresholdConfig, '/queueThresholdManager')
 api.add_resource(ErrorListResource, '/geterrors')
 
 if __name__ == "__main__":
