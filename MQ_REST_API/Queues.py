@@ -14,10 +14,39 @@ class Queue(ABC):
         self.holds_messages = None
         self.messages = []
         self.type_name = None
+        self.threshold = 0
+        self.threshold_limit = 0.8 #default threshold limit of 80%
 
     @abstractmethod
     def get_type_name(self):
         pass
+
+    def thresholdWarning(self):
+        if self.current_depth == self.max_number_of_messages:
+            return {
+                "object_type": "queue",
+                "error_code": "QUEUE_FULL",
+                "queue_name": self.queue_name,
+                "number_of_messages": self.current_depth,
+                "max_num_messages": self.max_number_of_messages,
+                "current_threshold": self.threshold,
+                "max_threshold": self.threshold_limit,
+                "message": "The queue is 100% full. Immediate action required!"
+            }
+        elif self.threshold >= self.threshold_limit:
+            return {
+                "object_type": "queue",
+                "error_code": "THRESHOLD_EXCEEDED",
+                "queue_name": self.queue_name,
+                "number_of_messages": self.current_depth,
+                "max_num_messages": self.max_number_of_messages,
+                "current_threshold": self.threshold,
+                "max_threshold": self.threshold_limit,
+                "message": "The threshold limit of the queue has been exceeded. Please take necessary actions to avoid potential issues."
+            }
+        else:
+            return None
+
 
     def to_dict(self):
         return self.__dict__

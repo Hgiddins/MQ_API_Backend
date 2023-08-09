@@ -76,6 +76,7 @@ class Client:
         response = self.get_request(f"/ibmmq/rest/v1/admin/qmgr/{self.qmgr}/queue?name=DEV*&attributes=*&status=*")
         queue_json = json.loads(response)
         queues = Parser.parse_queue_response(queue_json)
+
         # for q in queues:
         #     queue_messages = self.get_all_messages(q.queue_name)
         #     queue_messages_content_and_id = [{'Message ID': message.message_id,
@@ -90,6 +91,8 @@ class Client:
         queue_json = json.loads(response)
         queues = Parser.parse_queue_response(queue_json)
         return queues[0]
+
+
 
     def get_channel(self, channel):
         json_request = json.dumps({
@@ -209,6 +212,7 @@ class Parser:
             else:
                 continue
 
+            queue.current_depth = queue_json['status']['currentDepth'] #might break
             queue.queue_name = queue_json['name']
             queue.max_number_of_messages = queue_json['storage']['maximumDepth']
             queue.max_message_length = queue_json['storage']['maximumMessageLength']
@@ -217,6 +221,7 @@ class Parser:
             queue.description = queue_json['general']['description']
             queue.time_created = queue_json['timestamps']['created']
             queue.time_altered = queue_json['timestamps']['altered']
+            queue.threshold = queue.current_depth / queue.max_number_of_messages
 
 
             queues.append(queue)

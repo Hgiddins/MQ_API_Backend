@@ -9,7 +9,7 @@ flask_endpoint = "https://127.0.0.1:5000/"
 
 # #
 base_url = "https://13.87.80.195:9443"
-qmgr = "QM"
+qmgr = "QM1"
 username = "admin"
 password = "passw0rd"
 
@@ -86,6 +86,27 @@ class QMgrSystemReport:
         self.get_all_channels()
         self.get_dependency_graph()
 
+    def post_queue_thresholds(self, thresholds):
+        """
+        Posts threshold values to a given API endpoint.
+        """
+        response = self.request_json("queuethresholds", method="POST", data=thresholds)
+        if response:
+            print('Thresholds Posted:', response)
+        else:
+            print("Failed to post queue thresholds.")
+
+    def get_threshold_errors(self):
+        """
+        Retrieves errors related to queue thresholds.
+        """
+        response = self.request_json("geterrors")
+        if response:
+            print('Errors:', response)
+        else:
+            print("Failed to retrieve errors.")
+
+
 
 def post_chatbot_query_and_get_response(query, objects, indicator):
     def request_json(url, method="GET", data=None):
@@ -134,8 +155,24 @@ def measure_execution_time(func):
     print("Execution time: {:.2f} seconds".format(execution_time))
 
 
+# testing getting MQ API data
 report_service = QMgrSystemReport(qmanager_name= qmgr, base_url=base_url, username= username, password=password)
 report_service.generate_report()
+
+
+# testing posting threshold data
+queue_threshold_config_payload = {
+    "DEV.QUEUE.5": 0.0
+}
+report_service.post_queue_thresholds(queue_threshold_config_payload)
+
+# testing getting the threshold error
+# get another report so the error will be triggered
+report_service.generate_report()
+# get threshold error
+report_service.get_threshold_errors()
+
+
 def example_usage():
     response = post_chatbot_query_and_get_response("what is a 2035 error?", 'None' "systemMessage")
     print(response)
