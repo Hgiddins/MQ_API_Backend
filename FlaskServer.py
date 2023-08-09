@@ -3,7 +3,7 @@ from flask_restful import Api, Resource
 from MQ_REST_API.DependencyGraph import DependencyGraph
 from flask_caching import Cache
 import MQ_REST_API.MQ
-from ChatBot.ChatBot import boot_chatbot, get_error_message_chatbot_response, get_general_chatbot_response
+from ChatBot.MainChatBot import boot_chatbot, get_error_message_chatbot_response, get_general_chatbot_response
 import urllib3
 from ErrorLogging import ThreadsafeErrorList, QueueThresholdsConfig
 

@@ -11,16 +11,14 @@ from langchain.memory import ConversationSummaryMemory
 from langchain.llms import OpenAI
 from langchain.vectorstores import Chroma
 from langchain.memory import ConversationBufferMemory
-
-
-from ChatBot import ChatBotConstants
+from ChatBot.ChatBotConstants import APIKEY
 
 
 def setup_openai_authorization():
     """
     Sets up OpenAI's API authorization using environment variables or constants.
     """
-    os.environ["OPENAI_API_KEY"] = ChatBotConstants.APIKEY
+    os.environ["OPENAI_API_KEY"] = APIKEY
 
 def get_index(persist, loader):
     """
@@ -105,10 +103,22 @@ def get_general_chatbot_response(retrieval_chain, conversation_chain, user_query
 
     documentation_context = retrieval_chain({"question": context_prompt})['answer']
 
-    troubleshoot_prompt = """Given the provided context provided answer the question. If the provided context is not relevant then you do not have to use it: 
+    troubleshoot_prompt = """Answer the question. You have been provided context which MIGHT be relevant; if it is not relevant then you do not use it: 
     *Question:\n""" + user_query + "\n\nIBMMQ Documentation reference:\n"+documentation_context
 
     result = conversation_chain.predict(input=troubleshoot_prompt)
     return result
 
+
+
+# testing
+# retrieval_chain, conversation_chain = boot_chatbot()
+# question = "what is a 2035 error?"
+# objects = "none"
+#
+# print(get_error_message_chatbot_response(retrieval_chain, conversation_chain, question, objects))
+# question = "Who is barack obama"
+# print(get_general_chatbot_response(retrieval_chain, conversation_chain, question))
+# question = "When was he born"
+# print(get_general_chatbot_response(retrieval_chain, conversation_chain, question))
 

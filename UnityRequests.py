@@ -157,34 +157,34 @@ def measure_execution_time(func):
 
 # testing getting MQ API data
 report_service = QMgrSystemReport(qmanager_name= qmgr, base_url=base_url, username= username, password=password)
-report_service.generate_report()
+# report_service.generate_report()
 
 
 # testing posting threshold data
 queue_threshold_config_payload = {
     "DEV.QUEUE.5": 0.0
 }
-report_service.post_queue_thresholds(queue_threshold_config_payload)
-
-# testing getting the threshold error
-# get another report so the error will be triggered
-report_service.generate_report()
-# get threshold error
-report_service.get_threshold_errors()
-
-
-def example_usage():
-    response = post_chatbot_query_and_get_response("what is a 2035 error?", 'None' "systemMessage")
-    print(response)
-
-# Measure execution time for the example usage
-# measure_execution_time(example_usage)
+# report_service.post_queue_thresholds(queue_threshold_config_payload)
+#
+# # *****testing getting the threshold error******
+# # get another report so the error will be triggered
+# report_service.generate_report()
+# # get threshold error
+# report_service.get_threshold_errors()
 
 
 
+# ****testing chatbot*****:
+response = post_chatbot_query_and_get_response("what is a 2035 error?", 'None', "systemMessage")
+print(response)
+response = post_chatbot_query_and_get_response("who is barack obama?", 'None', "userMessage")
+print(response)
+response = post_chatbot_query_and_get_response("when was he born?", 'None', "userMessage")
+print(response)
 
 
-# threded example>>>>>>
+
+# ******threaded example******
 
 # import threading
 # import time
