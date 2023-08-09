@@ -8,6 +8,10 @@ import urllib3
 from ErrorLogging import ThreadsafeErrorList, QueueThresholdsConfig
 
 
+#############################
+#      INITIALISATION       #
+#############################
+
 # Suppress only the single InsecureRequestWarning from urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -27,11 +31,13 @@ errorList = ThreadsafeErrorList.ThreadSafeErrorList()
 # global client, must first be posted to for MQ_REST_API to work
 client = None
 
-
 # Chat Bot connection and instantiation
 retrieval_chain, conversation_chain = boot_chatbot()
 
 
+############################################################################################################
+#                                           MQ REST API LOGIN                                              #
+############################################################################################################
 
 class ClientConfig(Resource):
 
@@ -64,6 +70,10 @@ class ClientConfig(Resource):
             return {"message": f"Login failed, no queue manager named {data['qmgr']}."}, 400
 
 
+############################################################################################################
+#                                           Error Handling                                                 #
+############################################################################################################
+
 class ErrorListResource(Resource):
 
     # Step 2: Implement the `get` method for this resource to fetch all errors
@@ -89,6 +99,10 @@ class QueueThresholdConfig(Resource):
 
         return {"message": "Thresholds updated successfully."}, 200
 
+
+############################################################################################################
+#                                               ChatBot                                                    #
+############################################################################################################
 
 class ChatBotQuery(Resource):
 
@@ -124,6 +138,10 @@ class ChatBotQuery(Resource):
         else:
             return {"message": "Invalid indicator value."}, 400
 
+
+############################################################################################################
+#                                               MQ Objects                                                 #
+############################################################################################################
 
 class GetAllQueueManagers(Resource):
     def get(self):
@@ -208,6 +226,10 @@ class GetDependencyGraph(Resource):
         return {'Dependency Graph': graph_as_dicts}
 
 
+############################################################################################################
+#                                           ADDING API RESOURCES                                           #
+############################################################################################################
+
 api.add_resource(ClientConfig, '/clientconfig')
 api.add_resource(GetAllQueueManagers, '/getallqueuemanagers')
 api.add_resource(GetAllQueues, '/getallqueues')
@@ -218,6 +240,10 @@ api.add_resource(ChatBotQuery, '/chatbotquery')
 api.add_resource(QueueThresholdConfig, '/queueThresholdManager')
 api.add_resource(ErrorListResource, '/geterrors')
 
+
+############################################################################################################
+#                                       Run, Certificate, Threading                                        #
+############################################################################################################
 if __name__ == "__main__":
     # app.run(debug=True)
     app.run(debug=True, ssl_context=("cert.pem", "key.pem"), threaded = True)
