@@ -157,12 +157,12 @@ def measure_execution_time(func):
 
 # testing getting MQ API data
 report_service = QMgrSystemReport(qmanager_name= qmgr, base_url=base_url, username= username, password=password)
-report_service.generate_report()
+# report_service.generate_report()
 
 
 # testing posting threshold data
 queue_threshold_config_payload = {
-    "DEV.QUEUE.5": 0.3
+    "DEV.QUEUE.5": 0
 }
 report_service.post_queue_thresholds(queue_threshold_config_payload)
 #

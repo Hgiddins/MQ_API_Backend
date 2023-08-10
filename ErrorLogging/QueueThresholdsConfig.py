@@ -1,9 +1,10 @@
 from threading import Lock
+import datetime
 
 class QueueThresholdManager:
     def __init__(self):
         self._thresholds = {}
-        self.defaultThreshold = 0.8
+        self.defaultThreshold = 0 #currently set to 0 so all will trigger. normally something like 0.8 is appropriate
         self._lock = Lock()
 
     def update(self, new_thresholds):
@@ -19,6 +20,7 @@ class QueueThresholdManager:
             return queue_name in self._thresholds
 
     def thresholdWarning(self, queue, thresholdLimit):
+        current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if queue.current_depth == queue.max_number_of_messages:
             return {
                 "object_type": "queue",
@@ -28,7 +30,8 @@ class QueueThresholdManager:
                 "max_num_messages": queue.max_number_of_messages,
                 "current_threshold": queue.threshold,
                 "max_threshold": thresholdLimit,
-                "message": "The queue is 100% full. Immediate action required!"
+                "message": "The queue is 100% full. Immediate action required!",
+                "timestamp": current_time
             }
         elif queue.threshold >= thresholdLimit:
             return {
@@ -39,7 +42,8 @@ class QueueThresholdManager:
                 "max_num_messages": queue.max_number_of_messages,
                 "current_threshold": queue.threshold,
                 "max_threshold": thresholdLimit,
-                "message": "The threshold limit of the queue has been exceeded. Please take necessary actions to avoid potential issues."
+                "message": "The threshold limit of the queue has been exceeded. Please take necessary actions to avoid potential issues.",
+                "timestamp": current_time
             }
         else:
             return None
