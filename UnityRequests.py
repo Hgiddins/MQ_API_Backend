@@ -96,7 +96,7 @@ class QMgrSystemReport:
         else:
             print("Failed to post queue thresholds.")
 
-    def get_threshold_errors(self):
+    def get_errors(self):
         """
         Retrieves errors related to queue thresholds.
         """
@@ -170,7 +170,7 @@ report_service.post_queue_thresholds(queue_threshold_config_payload)
 # # get another report so the error will be triggered
 report_service.generate_report()
 # get threshold error
-report_service.get_threshold_errors()
+report_service.get_errors()
 
 
 
