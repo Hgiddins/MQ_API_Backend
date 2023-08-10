@@ -55,7 +55,7 @@ class ClientConfig(Resource):
         client = MQ_REST_API.MQ.Client(url=data["url"], qmgr=data["qmgr"], username=data["username"],
                                        apikey=data["apikey"])
 
-        cache.set('qmgr', data["qmgr"], timeout=10)
+        cache.set('qmgr', data["qmgr"])
 
         try:
             qmgr_state = client.get_qmgr().state
