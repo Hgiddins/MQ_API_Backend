@@ -52,8 +52,14 @@ class ClientConfig(Resource):
         if not all(field in data for field in ["qmgr", "url", "username", "password"]):
             return {"message": "Missing required fields. Ensure 'url', 'username', and 'password' are provided."}, 400
 
-        client = MQ_REST_API.MQ.Client(url=data["url"], qmgr=data["qmgr"], username=data["username"],
+
+        try:
+            client = MQ_REST_API.MQ.Client(url=data["url"], qmgr=data["qmgr"], username=data["username"],
                                        password=data["password"])
+        except Exception as e:
+            return {"message": f"Login failed, incorrect login details. Check Endpoint, Username and Password "}, 400
+
+
 
         cache.set('qmgr', data["qmgr"])
 
@@ -177,7 +183,6 @@ class GetAllQueues(Resource):
 
         # No need to interact with errorCache. Just return the list of queues.
         return {'All_Queues': queues_as_dicts}
-
 
 
 class GetAllApplications(Resource):

@@ -27,9 +27,9 @@ class QMgrSystemReport:
             "url": url,
             "qmgr": qmgr,
             "username": username,
-            "password": password
+            "password": 'notpassword'
         }
-        self.request_json("clientconfig", method="POST", data=client_config)
+        print(self.request_json("clientconfig", method="POST", data=client_config))
 
 
     def request_json(self, url, method="GET", data=None):
@@ -162,7 +162,8 @@ report_service = QMgrSystemReport(qmanager_name= qmgr, base_url=base_url, userna
 
 # testing posting threshold data
 queue_threshold_config_payload = {
-    "DEV.QUEUE.5": 0
+    "DEV.QUEUE.5": 0.75,
+    "DEV.QUEUE.2": 0.8
 }
 report_service.post_queue_thresholds(queue_threshold_config_payload)
 #
