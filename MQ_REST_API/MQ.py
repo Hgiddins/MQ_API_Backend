@@ -19,9 +19,16 @@ class Client:
 
     def authenticate(self):
         request_url = f"{self.baseUrl}/ibmmq/rest/v1/login"
-        body = json.dumps({"username": self.username,"password": self.password})
-        response = self.session.post(request_url, data=body, headers={'Content-Type': 'application/json'}, verify = False)
-        response.raise_for_status()
+        body = json.dumps({"username": self.username, "password": self.password})
+
+        try:
+            response = self.session.post(request_url, data=body, headers={'Content-Type': 'application/json'},
+                                         verify=False, timeout=5)
+            response.raise_for_status()
+        except requests.Timeout:
+            raise Exception("Authentication request timed out after 5 seconds.")
+        except requests.RequestException as e:
+            raise Exception(f"Authentication request failed: {str(e)}")
 
     def get_queue_manager_name(self):
         return self.qmgr

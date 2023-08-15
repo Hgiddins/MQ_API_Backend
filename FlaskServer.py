@@ -57,8 +57,11 @@ class ClientConfig(Resource):
             client = MQ_REST_API.MQ.Client(url=data["url"], qmgr=data["qmgr"], username=data["username"],
                                        password=data["password"])
         except Exception as e:
-            return {"message": f"Login failed, incorrect login details. Check Url, Username and Password "}
-
+            # Check if the exception message indicates a timeout
+            if "timed out" in str(e):
+                return {"message": "Connection timeout; check URL"}
+            else:
+                return {"message": f"Login failed, incorrect login details. Check Username and Password "}
 
 
         cache.set('qmgr', data["qmgr"])
