@@ -27,7 +27,7 @@ class QMgrSystemReport:
             "url": url,
             "qmgr": qmgr,
             "username": username,
-            "password": 'notpassword'
+            "password": password
         }
         print(self.request_json("clientconfig", method="POST", data=client_config))
 
