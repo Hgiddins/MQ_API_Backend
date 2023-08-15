@@ -10,7 +10,7 @@ flask_endpoint = "https://127.0.0.1:5000/"
 # #
 base_url = "https://13.87.80.195:9443"
 qmgr = "QM1"
-username = "admin"
+username = "adm"
 password = "passw0rd"
 
 class QMgrSystemReport:
@@ -27,7 +27,7 @@ class QMgrSystemReport:
             "url": url,
             "qmgr": qmgr,
             "username": username,
-            # "password": password
+            "password": password
         }
         print(self.request_json("clientconfig", method="POST", data=client_config))
 

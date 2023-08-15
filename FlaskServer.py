@@ -50,14 +50,14 @@ class ClientConfig(Resource):
 
         # Ensure all necessary fields are in the posted data
         if not all(field in data for field in ["qmgr", "url", "username", "password"]):
-            return {"message": "Missing required fields. Ensure Url, Queue Manager, Username, and Password are all provided."}, 400
+            return {"message": "Missing required fields. Ensure Url, Queue Manager, Username, and Password are all provided."}
 
 
         try:
             client = MQ_REST_API.MQ.Client(url=data["url"], qmgr=data["qmgr"], username=data["username"],
                                        password=data["password"])
         except Exception as e:
-            return {"message": f"Login failed, incorrect login details. Check Url, Username and Password "}, 400
+            return {"message": f"Login failed, incorrect login details. Check Url, Username and Password "}
 
 
 
@@ -67,13 +67,13 @@ class ClientConfig(Resource):
             qmgr_state = client.get_qmgr().state
 
             if qmgr_state == "running":
-                return {"message": "Login successful."}, 200
+                return {"message": "Login successful."}
             else:
-                return {"message": "Login failed, queue manager is not running."}, 400
+                return {"message": "Login failed, queue manager is not running."}
 
         except Exception as e:
             # catch the exception related to qmgr not existing.
-            return {"message": f"Login failed, no queue manager named {data['qmgr']}."}, 400
+            return {"message": f"Login failed, no queue manager named {data['qmgr']}."}
 
 
 ############################################################################################################
