@@ -10,7 +10,7 @@ flask_endpoint = "https://127.0.0.1:5000/"
 # #
 base_url = "https://13.87.80.195:9443"
 qmgr = "QM1"
-username = "adm"
+username = "admin"
 password = "passw0rd"
 
 class QMgrSystemReport:
@@ -96,6 +96,16 @@ class QMgrSystemReport:
         else:
             print("Failed to post queue thresholds.")
 
+    def get_queue_thresholds(self):
+        """
+        Retrieves threshold values from a given API endpoint.
+        """
+        response = self.request_json("queueThresholdManager", method="GET")
+        if response:
+            print('Retrieved Thresholds:', response)
+        else:
+            print("Failed to retrieve queue thresholds.")
+
     def get_errors(self):
         """
         Retrieves errors related to queue thresholds.
@@ -166,12 +176,14 @@ queue_threshold_config_payload = {
     "DEV.QUEUE.2": 0.8
 }
 report_service.post_queue_thresholds(queue_threshold_config_payload)
+report_service.get_queue_thresholds()
 #
 # # *****testing getting the threshold error******
 # # get another report so the error will be triggered
 report_service.generate_report()
 # get threshold error
 report_service.get_errors()
+report_service.get_queue_thresholds()
 
 
 

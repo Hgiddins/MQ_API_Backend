@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_restful import Api, Resource
 from MQ_REST_API.DependencyGraph import DependencyGraph
 from flask_caching import Cache
@@ -96,17 +96,25 @@ class ErrorListResource(Resource):
 
 
 class QueueThresholdConfig(Resource):
-    def post(self):
-        data = request.get_json()
+    def get(self):
+        with queueThresholdManager._lock:
+            thresholds = queueThresholdManager._thresholds.copy() # Copy to ensure thread-safety while reading
+        return jsonify(thresholds)
 
-        # Ensure the data is valid (contains queue names and their thresholds)
+    def post(self):
+        data = request.get_json(force=True)  # This will ensure it doesn't fail even if content-type is not set
+
+        if not data:
+            return {"message": "No data provided."}  # Return with bad request status
+
         if not all(isinstance(data[key], (int, float)) for key in data):
             return {
-                "message": "Invalid threshold data. Ensure you provide a valid threshold (float) for each queue name."}, 400
+                "message": "Invalid threshold data. Ensure you provide a valid threshold (float) and queue name."
+            }  # Return with bad request status
 
         queueThresholdManager.update(data)  # Update the thresholds using the manager
 
-        return {"message": "Thresholds updated successfully."}, 200
+        return {"message": "Thresholds updated successfully."}
 
 
 ############################################################################################################
@@ -125,12 +133,12 @@ class ChatBotQuery(Resource):
         # Store the query details in the cache
         cache.set('query', [data["question"], data["objects"], data["indicator"]])
 
-        return {"message": "Query stored successfully."}, 200
+        return {"message": "Query stored successfully."}
 
     def get(self):
         query_details = cache.get('query')
         if not query_details:
-            return {"message": "No query found in cache."}, 404
+            return {"message": "No query found in cache."}
 
         question, objects, indicator = query_details
 
@@ -145,7 +153,7 @@ class ChatBotQuery(Resource):
             return response
 
         else:
-            return {"message": "Invalid indicator value."}, 400
+            return {"message": "Invalid indicator value."}
 
 
 ############################################################################################################
@@ -175,10 +183,14 @@ class GetAllQueues(Resource):
         queues_as_dicts = []
 
         for queue in queues:
-            currentQueueThreshold = queueThresholdManager.defaultThreshold
+
             # Checking for custom queue threshold using the manager
             if queueThresholdManager.contains(queue.queue_name):
                 currentQueueThreshold = queueThresholdManager.get(queue.queue_name)
+            else:
+                currentQueueThreshold = queueThresholdManager.defaultThreshold
+                queueThresholdManager.update({queue.queue_name: currentQueueThreshold})
+
             error_msg = queueThresholdManager.thresholdWarning(queue, currentQueueThreshold)  # Call the thresholdWarning method of the Queue object
             if error_msg:
                 errorList.add_error(error_msg)  # Directly add the error message to the global errorLog

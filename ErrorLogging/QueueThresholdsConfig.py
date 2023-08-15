@@ -4,7 +4,7 @@ import datetime
 class QueueThresholdManager:
     def __init__(self):
         self._thresholds = {}
-        self.defaultThreshold = 0 #currently set to 0 so all will trigger. normally something like 0.8 is appropriate
+        self.defaultThreshold = 0.8
         self._lock = Lock()
 
     def update(self, new_thresholds):
