@@ -50,14 +50,14 @@ class ClientConfig(Resource):
 
         # Ensure all necessary fields are in the posted data
         if not all(field in data for field in ["qmgr", "url", "username", "password"]):
-            return {"message": "Missing required fields. Ensure 'url', 'username', and 'password' are provided."}, 400
+            return {"message": "Missing required fields. Ensure Url, Queue Manager, Username, and Password are all provided."}, 400
 
 
         try:
             client = MQ_REST_API.MQ.Client(url=data["url"], qmgr=data["qmgr"], username=data["username"],
                                        password=data["password"])
         except Exception as e:
-            return {"message": f"Login failed, incorrect login details. Check Endpoint, Username and Password "}, 400
+            return {"message": f"Login failed, incorrect login details. Check Url, Username and Password "}, 400
 
 
 
