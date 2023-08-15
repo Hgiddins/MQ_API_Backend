@@ -8,18 +8,18 @@ from MQ_REST_API.Application import Application, ConnectedObject
 
 
 class Client:
-    def __init__(self, url, qmgr=None, username=None, apikey=None):
+    def __init__(self, url, qmgr=None, username=None, password=None):
         self.baseUrl = url
         self.qmgr = qmgr
         self.username = username
-        self.apikey = apikey
+        self.password = password
         self.session = requests.Session()
         self.session.headers.update({'Accept': 'application/json', 'ibm-mq-rest-csrf-token': 'value'})
         self.authenticate()
 
     def authenticate(self):
         request_url = f"{self.baseUrl}/ibmmq/rest/v1/login"
-        body = json.dumps({"username": self.username,"password": self.apikey})
+        body = json.dumps({"username": self.username,"password": self.password})
         response = self.session.post(request_url, data=body, headers={'Content-Type': 'application/json'}, verify = False)
         response.raise_for_status()
 

@@ -22,12 +22,12 @@ class QMgrSystemReport:
         self.dependency_graph = {}
         self.post_client_config(base_url, qmanager_name, username, password)
 
-    def post_client_config(self, url, qmgr, username, apikey):
+    def post_client_config(self, url, qmgr, username, password):
         client_config = {
             "url": url,
             "qmgr": qmgr,
             "username": username,
-            "apikey": apikey
+            "password": password
         }
         self.request_json("clientconfig", method="POST", data=client_config)
 
