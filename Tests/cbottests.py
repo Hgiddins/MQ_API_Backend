@@ -1,9 +1,9 @@
-from ChatBot.MainChatBot import boot_chatbot, get_error_message_chatbot_response
+from ChatBot.MainChatBot import boot_chatbot, get_issue_message_chatbot_response
 
 
-query = 'can you explain what a 2035 error is?'
+query = 'can you explain what a 2035 issue is?'
 
-error_msg = """
+issue_msg = """
 {
     "event": {
         "type": "PCF",
@@ -29,4 +29,4 @@ error_msg = """
 }
 """
 retrieval_chain, conversation_chain = boot_chatbot()
-print(get_error_message_chatbot_response(retrieval_chain, conversation_chain, error_msg))
+print(get_issue_message_chatbot_response(retrieval_chain, conversation_chain, issue_msg))

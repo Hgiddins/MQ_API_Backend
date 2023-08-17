@@ -3,9 +3,9 @@ from flask_restful import Api, Resource
 from MQ_REST_API.DependencyGraph import DependencyGraph
 from flask_caching import Cache
 import MQ_REST_API.MQ
-from ChatBot.MainChatBot import boot_chatbot, get_error_message_chatbot_response, get_general_chatbot_response
+from ChatBot.MainChatBot import boot_chatbot, get_issue_message_chatbot_response, get_general_chatbot_response
 import urllib3
-from ErrorLogging import ThreadsafeErrorList, QueueThresholdsConfig
+from IssueLogging import ThreadsafeIssueList, QueueThresholdsConfig
 
 
 #############################
@@ -25,8 +25,8 @@ cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 # Insantiating threadsafe queue threshold configuration
 queueThresholdManager = QueueThresholdsConfig.QueueThresholdManager()
 
-# Logging of errors - threadsafe
-errorList = ThreadsafeErrorList.ThreadSafeErrorList()
+# Logging of issues - threadsafe
+issueList = ThreadsafeIssueList.ThreadSafeIssueList()
 
 # global client, must first be posted to for MQ_REST_API to work
 client = None
@@ -82,19 +82,57 @@ class ClientConfig(Resource):
 
 
 ############################################################################################################
-#                                           Error Handling                                                 #
+#                                           Issue Handling                                                 #
 ############################################################################################################
 
-class ErrorListResource(Resource):
+class IssueListResource(Resource):
 
-    # Step 2: Implement the `get` method for this resource to fetch all errors
+    # Step 2: Implement the `get` method for this resource to fetch all issues
     def get(self):
-        errors = errorList.get_errors()
+        issues = issueList.get_issues()
 
-        # Step 3: After fetching, clear the errors from the error list
-        errorList.clear_errors()
+        # Step 3: After fetching, clear the issues from the issue list
+        issueList.clear_issues()
 
-        return {"errors": errors}
+        return {"issues": issues}
+
+
+    # TODO This is still in test:
+    def post(self):
+        issues = request.get_json()
+
+        if not isinstance(issues, list):
+            return {"message": "Expecting a list of issues."}, 400
+
+        for data in issues:
+            # Check if required fields are present in each issue
+            if not all(field in data for field in ["object_type", "object_name"]):
+                return {"message": "Missing required fields. Ensure each issue has 'object_type' and 'object_name'."}, 400
+
+            # Depending on the object type, search in the appropriate cache and add object details to data
+            if data['object_type'] == 'application':
+                applications = cache.get('all_applications')
+                for app in applications:
+                    if app['conn'] == data['object_name']:
+                        data['object_details'] = app.to_dict()
+                        break
+            elif data['object_type'] == 'channel':
+                channels = cache.get('all_channels')
+                for channel in channels:
+                    if channel['channel_name'] == data['object_name']:
+                        data['object_details'] = channel.to_dict()
+                        break
+            elif data['object_type'] == 'queue':
+                queues = cache.get('all_queues')
+                for queue in queues:
+                    if queue['queue_name'] == data['object_name']:
+                        data['object_details'] = queue.to_dict()
+                        break
+
+            # append the issue to the issue list
+            issueList.add_issue(data)
+
+        return {"message": f"{len(issues)} issues added successfully!"}
 
 
 class QueueThresholdConfig(Resource):
@@ -145,7 +183,7 @@ class ChatBotQuery(Resource):
         question, indicator = query_details
 
         if indicator == "systemMessage":
-            response = get_error_message_chatbot_response(retrieval_chain, conversation_chain, question)
+            response = get_issue_message_chatbot_response(retrieval_chain, conversation_chain, question)
             cache.delete('query')  # Clear the cache after processing the query
             return {"chatbotresponse": response}
 
@@ -188,12 +226,12 @@ class GetAllQueues(Resource):
                 currentQueueThreshold = queueThresholdManager.defaultThreshold
                 queueThresholdManager.update({queue.queue_name: currentQueueThreshold})
 
-            error_msg = queueThresholdManager.thresholdWarning(queue, currentQueueThreshold)  # Call the thresholdWarning method of the Queue object
-            if error_msg:
-                errorList.add_error(error_msg)  # Directly add the error message to the global errorLog
+            issue_msg = queueThresholdManager.thresholdWarning(queue, currentQueueThreshold)  # Call the thresholdWarning method of the Queue object
+            if issue_msg:
+                issueList.add_issue(issue_msg)  # Directly add the issue message to the global issueLog
             queues_as_dicts.append(queue.to_dict())
 
-        # No need to interact with errorCache. Just return the list of queues.
+        # No need to interact with issueCache. Just return the list of queues.
         return {'All_Queues': queues_as_dicts}
 
 
@@ -251,7 +289,7 @@ api.add_resource(GetAllChannels, '/getallchannels')
 api.add_resource(GetDependencyGraph, '/getdependencygraph')
 api.add_resource(ChatBotQuery, '/chatbotquery')
 api.add_resource(QueueThresholdConfig, '/queueThresholdManager')
-api.add_resource(ErrorListResource, '/geterrors')
+api.add_resource(IssueListResource, '/getissues')
 
 
 ############################################################################################################

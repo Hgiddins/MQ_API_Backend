@@ -8,8 +8,8 @@ def get_all_queues():
         queues = response.json().get('All_Queues', [])
         print('Queues', queues)
     except requests.RequestException as e:
-        print(f"Failed to fetch data from {endpoint}. Error: {e}")
-    except ValueError:
+        print(f"Failed to fetch data from {endpoint}. Issue: {e}")
+    except ValueIssue:
         print(f"Invalid JSON response from {endpoint}")
 
 get_all_queues()

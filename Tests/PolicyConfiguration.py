@@ -21,35 +21,35 @@ class PolicyConfiguration:
         if not self.queue_name_case_sensitivity and queue.queue_name != queue.queue_name.lower():
             warnings.append({
                 'warning code': 'QueueNameCaseSensitivity',
-                'error message': "Queue name is not case-sensitive!",
+                'issue message': "Queue name is not case-sensitive!",
                 'queue': queue.queue_name
             })
 
         if len(queue.queue_name) > self.queue_name_max_length:
             warnings.append({
                 'warning code': 'QueueNameMaxLen',
-                'error message': f"Queue name exceeds max length of {self.queue_name_max_length} characters!",
+                'issue message': f"Queue name exceeds max length of {self.queue_name_max_length} characters!",
                 'queue': queue.queue_name
             })
 
         if len(queue.queue_name) < self.queue_name_min_length:
             warnings.append({
                 'warning code': 'QueueNameMinLen',
-                'error message': f"Queue name is less than min length of {self.queue_name_min_length} characters!",
+                'issue message': f"Queue name is less than min length of {self.queue_name_min_length} characters!",
                 'queue': queue.queue_name
             })
 
         if queue.max_number_of_messages > self.max_number_of_messages:
             warnings.append({
                 'warning code': 'MaxNumberOfMessages',
-                'error message': f"Queue exceeds max number of messages of {self.max_number_of_messages}!",
+                'issue message': f"Queue exceeds max number of messages of {self.max_number_of_messages}!",
                 'queue': queue.queue_name
             })
 
         if queue.max_message_length > self.max_message_length:
             warnings.append({
                 'warning code': 'MaxMessageLen',
-                'error message': f"Queue message length exceeds max length of {self.max_message_length} bytes!",
+                'issue message': f"Queue message length exceeds max length of {self.max_message_length} bytes!",
                 'queue': queue.queue_name
             })
 
@@ -60,7 +60,7 @@ class PolicyConfiguration:
         if message_depth_ratio > self.message_depth_warning_threshold:
             warnings.append({
                 'warning code': 'MessageDepthWarningThreshold',
-                'error message': f"Queue depth exceeds warning threshold of {self.message_depth_warning_threshold * 100}%!",
+                'issue message': f"Queue depth exceeds warning threshold of {self.message_depth_warning_threshold * 100}%!",
                 'queue': queue.queue_name
             })
 

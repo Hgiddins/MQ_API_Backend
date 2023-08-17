@@ -49,7 +49,7 @@ class QMgrSystemReport:
                 print(f"Unexpected response from {url}. Status code: {response.status_code}")
                 return None
         except requests.RequestException as e:
-            print(f"Failed to fetch data from {url}. Error: {e}")
+            print(f"Failed to fetch data from {url}. Issue: {e}")
             return None
         except ValueError:
             print(f"Invalid JSON response from {url}")
@@ -106,15 +106,15 @@ class QMgrSystemReport:
         else:
             print("Failed to retrieve queue thresholds.")
 
-    def get_errors(self):
+    def get_issues(self):
         """
-        Retrieves errors related to queue thresholds.
+        Retrieves issues related to queue thresholds.
         """
-        response = self.request_json("geterrors")
+        response = self.request_json("getissues")
         if response:
-            print('Errors:', response)
+            print('Issues:', response)
         else:
-            print("Failed to retrieve errors.")
+            print("Failed to retrieve issues.")
 
 
 
@@ -128,7 +128,7 @@ def post_chatbot_query_and_get_response(query, indicator):
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
-            print(f"Failed to fetch data from {url}. Error: {e}")
+            print(f"Failed to fetch data from {url}. Issue: {e}")
             return None
         except ValueError:
             print(f"Invalid JSON response from {url}")
@@ -177,17 +177,17 @@ queue_threshold_config_payload = {
 report_service.post_queue_thresholds(queue_threshold_config_payload)
 report_service.get_queue_thresholds()
 #
-# # *****testing getting the threshold error******
-# # get another report so the error will be triggered
+# # *****testing getting the threshold issue******
+# # get another report so the issue will be triggered
 report_service.generate_report()
-# get threshold error
-report_service.get_errors()
+# get threshold issue
+report_service.get_issues()
 report_service.get_queue_thresholds()
 
 
 
 # ****testing chatbot*****:
-# response = post_chatbot_query_and_get_response("what is a 2035 error?",  "systemMessage")
+# response = post_chatbot_query_and_get_response("what is a 2035 issue?",  "systemMessage")
 # print(response)
 # response = post_chatbot_query_and_get_response("who is barack obama?", "userMessage")
 # print(response)
@@ -203,7 +203,7 @@ report_service.get_queue_thresholds()
 #
 #
 # def chatbot_query():
-#     response = post_chatbot_query_and_get_response("what is a 2035 error?", "systemMessage")
+#     response = post_chatbot_query_and_get_response("what is a 2035 issue?", "systemMessage")
 #     print(response)
 #
 #

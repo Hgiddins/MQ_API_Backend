@@ -2,7 +2,7 @@
 Last Updated: 2023-05-31
 General explanation
 Explanation
-The user of the application or channel that produced the error, is not authorized to perform the operation attempted:
+The user of the application or channel that produced the issue, is not authorized to perform the operation attempted:
 		On an MQCONN or MQCONNX call, the user is not authorized to connect to the queue manager. This can be for one of the following reasons:
 		For locally bound applications, the application user ID has not been granted authority to connect to the queue manager.
 		An invalid user ID or password was specified in the MQCSP structure on an MQCONNX call.
@@ -16,7 +16,7 @@ The user of the application or channel that produced the error, is not authorize
 		On an MQSUB call, the user is not authorized to subscribe to the topic.
 		On an MQSUB call, using non-managed destination queues, the user is not authorized to use the destination queue.
 		The presence of an Advanced Message Security security policy.
-This reason code can also occur in the Feedback field in the message descriptor of a report message; in this case it indicates that the error was encountered by a message channel agent when it attempted to put the message on a remote queue.
+This reason code can also occur in the Feedback field in the message descriptor of a report message; in this case it indicates that the issue was encountered by a message channel agent when it attempted to put the message on a remote queue.
 Completion code
 MQCC_FAILED
 Programmer response
@@ -30,13 +30,13 @@ This reason code is also used to identify the corresponding event message,
 		MQSUB destination Not Authorized (type 6).
 Specific problems generating RC2035
 JMSWMQ2013 invalid security authentication
-See Invalid security authentication for information when your IBM® MQ JMS application fails with security authentication errors.
+See Invalid security authentication for information when your IBM® MQ JMS application fails with security authentication issues.
 MQRC_NOT_AUTHORIZED on a queue or channel
 See MQRC_NOT_AUTHORIZED in WMQ for information when MQRC 2035 (MQRC_NOT_AUTHORIZED) is returned where a user is not authorized to perform the function. Determine which object the user cannot access and provide the user access to the object.
 MQRC_NOT_AUTHORIZED (AMQ4036 on a client) as an administrator
 See MQRC_NOT_AUTHORIZED as an administrator for information when MQRC 2035 (MQRC_NOT_AUTHORIZED) is returned where you try to use a user ID that is an IBM MQ Administrator, to remotely access the queue manager through a client connection.
 MQS_REPORT_NOAUTH
-See MQS_REPORT_NOAUTH for information on using this environment variable to better diagnose return code 2035 (MQRC_NOT_AUTHORIZED). The use of this environment variable generates errors in the queue manager error log, but does not generate a Failure Data Capture (FDC).
+See MQS_REPORT_NOAUTH for information on using this environment variable to better diagnose return code 2035 (MQRC_NOT_AUTHORIZED). The use of this environment variable generates issues in the queue manager issue log, but does not generate a Failure Data Capture (FDC).
 MQSAUTHERRORS
-See MQSAUTHERRORS for information on using this environment variable to generate FDC files related to return code 2035 (MQRC_NOT_AUTHORIZED). The use of this environment variable generates an FDC, but does not generate errors in the queue manager error log.
+See MQSAUTHERRORS for information on using this environment variable to generate FDC files related to return code 2035 (MQRC_NOT_AUTHORIZED). The use of this environment variable generates an FDC, but does not generate issues in the queue manager issue log.
 

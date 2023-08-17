@@ -25,7 +25,7 @@ class QueueThresholdManager:
         if queue.current_depth == queue.max_number_of_messages:
             return {
                 "object_type": "queue",
-                "error_code": "QUEUE_FULL",
+                "issue_code": "QUEUE_FULL",
                 "queue_name": queue.queue_name,
                 "max_threshold": thresholdLimit,
                 "message": "The queue is 100% full. Immediate action required!",
@@ -35,7 +35,7 @@ class QueueThresholdManager:
         elif queue.threshold >= thresholdLimit:
             return {
                 "object_type": "queue",
-                "error_code": "THRESHOLD_EXCEEDED",
+                "issue_code": "THRESHOLD_EXCEEDED",
                 "queue_name": queue.queue_name,
                 "max_threshold": thresholdLimit,
                 "message": f"The queue has exceeded the {thresholdLimit * 100}% threshold limit. Please take necessary actions to avoid potential issues.",

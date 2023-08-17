@@ -49,23 +49,23 @@ class Client:
             message_json = json.loads(response)
             messages = Parser.parse_message_response(message_json)
             return messages
-        except requests.HTTPError as error:
-            if error.response.status_code == 403:
-                print("Error 403: Forbidden. You do not have permission to get messages")
+        except requests.HTTPError as issue:
+            if issue.response.status_code == 403:
+                print("Issue 403: Forbidden. You do not have permission to get messages")
                 return []
             else:
-                raise  # re-raise the exception if it's not a 403 error
+                raise  # re-raise the exception if it's not a 403 issue
 
     def get_message_content(self, queue, message_id):
         try:
             return self.get_request(
                 f"/ibmmq/rest/v1/messaging/qmgr/{self.qmgr}/queue/{queue}/message?messageId={message_id}")
-        except requests.HTTPError as error:
-            if error.response.status_code == 403:
-                print("Error 403: Forbidden. You do not have permission to access this resource.")
+        except requests.HTTPError as issue:
+            if issue.response.status_code == 403:
+                print("Issue 403: Forbidden. You do not have permission to access this resource.")
                 return None
             else:
-                raise  # re-raise the exception if it's not a 403 error
+                raise  # re-raise the exception if it's not a 403 issue
 
     def get_all_queue_managers(self):
         response = self.get_request(f"/ibmmq/rest/v1/admin/qmgr?attributes=*")
