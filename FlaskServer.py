@@ -97,35 +97,34 @@ class IssueListResource(Resource):
         return {"issues": issues}
 
 
-    # TODO This is still in test:
     def post(self):
         issues = request.get_json()
 
         if not isinstance(issues, list):
-            return {"message": "Expecting a list of issues."}, 400
+            return {"message": "Expecting a list of issues."}
 
         for data in issues:
             # Check if required fields are present in each issue
             if not all(field in data for field in ["object_type", "object_name"]):
-                return {"message": "Missing required fields. Ensure each issue has 'object_type' and 'object_name'."}, 400
+                return {"message": "Missing required fields. Ensure each issue has 'object_type' and 'object_name'."}
 
             # Depending on the object type, search in the appropriate cache and add object details to data
             if data['object_type'] == 'application':
                 applications = cache.get('all_applications')
                 for app in applications:
-                    if app['conn'] == data['object_name']:
+                    if app.conn == data['object_name']:
                         data['object_details'] = app.to_dict()
                         break
             elif data['object_type'] == 'channel':
                 channels = cache.get('all_channels')
                 for channel in channels:
-                    if channel['channel_name'] == data['object_name']:
+                    if channel.channel_name == data['object_name']:
                         data['object_details'] = channel.to_dict()
                         break
             elif data['object_type'] == 'queue':
                 queues = cache.get('all_queues')
                 for queue in queues:
-                    if queue['queue_name'] == data['object_name']:
+                    if queue.queue_name == data['object_name']:
                         data['object_details'] = queue.to_dict()
                         break
 
@@ -289,7 +288,7 @@ api.add_resource(GetAllChannels, '/getallchannels')
 api.add_resource(GetDependencyGraph, '/getdependencygraph')
 api.add_resource(ChatBotQuery, '/chatbotquery')
 api.add_resource(QueueThresholdConfig, '/queueThresholdManager')
-api.add_resource(IssueListResource, '/getissues')
+api.add_resource(IssueListResource, '/issues')
 
 
 ############################################################################################################

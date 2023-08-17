@@ -110,11 +110,20 @@ class QMgrSystemReport:
         """
         Retrieves issues related to queue thresholds.
         """
-        response = self.request_json("getissues")
+        response = self.request_json("issues")
         if response:
             print('Issues:', response)
         else:
             print("Failed to retrieve issues.")
+
+    def post_issue(self,issue_data):
+        """
+        Posts an error (or list of errors) to the server.
+        """
+        response = self.request_json("issues", method="POST",
+                                data=issue_data)  # replace 'your_error_endpoint' with your actual endpoint
+        print(response)
+
 
 
 
@@ -181,6 +190,19 @@ report_service.get_queue_thresholds()
 # # get another report so the issue will be triggered
 report_service.generate_report()
 # get threshold issue
+error_data = [
+    {
+        "object_type": "application",
+        "object_name": "38C9D06400090040"
+    },
+    {
+        "object_type": "queue",
+        "object_name": "DEV.QUEUE.5"
+    }
+]
+
+# Post the error data
+report_service.post_issue(error_data)
 report_service.get_issues()
 report_service.get_queue_thresholds()
 
