@@ -171,8 +171,8 @@ report_service = QMgrSystemReport(qmanager_name= qmgr, base_url=base_url, userna
 
 # testing posting threshold data
 queue_threshold_config_payload = {
-    "DEV.QUEUE.5": 0.75,
-    "DEV.QUEUE.2": 0.8
+    "DEV.QUEUE.5": 0.00,
+    "DEV.QUEUE.2": 0.001
 }
 report_service.post_queue_thresholds(queue_threshold_config_payload)
 report_service.get_queue_thresholds()
@@ -187,12 +187,12 @@ report_service.get_queue_thresholds()
 
 
 # ****testing chatbot*****:
-response = post_chatbot_query_and_get_response("what is a 2035 error?",  "systemMessage")
-print(response)
-response = post_chatbot_query_and_get_response("who is barack obama?", "userMessage")
-print(response)
-response = post_chatbot_query_and_get_response("when was he born?",  "userMessage")
-print(response)
+# response = post_chatbot_query_and_get_response("what is a 2035 error?",  "systemMessage")
+# print(response)
+# response = post_chatbot_query_and_get_response("who is barack obama?", "userMessage")
+# print(response)
+# response = post_chatbot_query_and_get_response("when was he born?",  "userMessage")
+# print(response)
 
 
 

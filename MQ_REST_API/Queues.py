@@ -14,7 +14,6 @@ class Queue(ABC):
         self.holds_messages = None
         self.messages = []
         self.type_name = None
-        self.threshold = 0
 
     @abstractmethod
     def get_type_name(self):

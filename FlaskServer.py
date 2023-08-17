@@ -164,11 +164,9 @@ class ChatBotQuery(Resource):
 
 class GetAllQueueManagers(Resource):
     def get(self):
-        qmgrs = cache.get('all_qmgrs')
+        qmgrs = client.get_all_queue_managers()
+        cache.set('all_qmgrs', qmgrs)
 
-        if qmgrs is None:
-            qmgrs = client.get_all_queue_managers()
-            cache.set('all_qmgrs', qmgrs, timeout=10)
 
         qmgrs_as_dicts = [qmgr.to_dict() for qmgr in qmgrs]
         return {'All_Queue_Managers': qmgrs_as_dicts}
@@ -176,11 +174,8 @@ class GetAllQueueManagers(Resource):
 
 class GetAllQueues(Resource):
     def get(self):
-        queues = cache.get('all_queues')
-
-        if queues is None:
-            queues = client.get_all_queues()
-            cache.set('all_queues', queues, timeout=10)
+        queues = client.get_all_queues()
+        cache.set('all_queues', queues)
 
         queues_as_dicts = []
 
@@ -204,10 +199,8 @@ class GetAllQueues(Resource):
 
 class GetAllApplications(Resource):
     def get(self):
-        applications = cache.get('all_applications')
-        if applications is None:
-            applications = client.get_all_applications()
-            cache.set('all_applications', applications, timeout=10)
+        applications = client.get_all_applications()
+        cache.set('all_applications', applications)
 
         apps_as_dicts = [app.to_dict() for app in applications]
         return {'All_Applications': apps_as_dicts}
@@ -215,10 +208,8 @@ class GetAllApplications(Resource):
 
 class GetAllChannels(Resource):
     def get(self):
-        channels = cache.get('all_channels')
-        if channels is None:
-            channels = client.get_all_channels()
-            cache.set('all_channels', channels, timeout=10)
+        channels = client.get_all_channels()
+        cache.set('all_channels', channels)
 
         chs_as_dicts = [ch.to_dict() if hasattr(ch, 'to_dict') else 'Not a channel instance' for ch in channels]
         return {'All_Channels': chs_as_dicts}
@@ -230,17 +221,17 @@ class GetDependencyGraph(Resource):
         channels = cache.get('all_channels')
         if channels is None:
             channels = client.get_all_channels()
-            cache.set('all_channels', channels, timeout=10)
+            cache.set('all_channels', channels)
 
         applications = cache.get('all_applications')
         if applications is None:
             applications = client.get_all_applications()
-            cache.set('all_applications', applications, timeout=10)
+            cache.set('all_applications', applications)
 
         queues = cache.get('all_queues')
         if queues is None:
             queues = client.get_all_queues()
-            cache.set('all_queues', queues, timeout=10)
+            cache.set('all_queues', queues)
 
         graph = DependencyGraph()
         graph.create_dependency_graph(queues, channels, applications, qmgr)
