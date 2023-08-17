@@ -49,10 +49,12 @@ class ClientConfig(Resource):
         global client
 
         # Ensure all necessary fields are in the posted data
-        if not all(field in data for field in ["qmgr", "url", "username", "password"]):
-            return {"message": "Missing required fields. Ensure Url, Queue Manager, Username, and Password are all provided."}
+        required_fields = ["qmgr", "url", "username", "password"]
 
-
+        # Check if all fields are present and they are not None or empty string
+        if not all(field in data and data[field] not in [None, ""] for field in required_fields):
+            return {
+                "message": "Missing or invalid required fields. Ensure Url, Queue Manager, Username, and Password are all provided and not empty."}
         try:
             client = MQ_REST_API.MQ.Client(url=data["url"], qmgr=data["qmgr"], username=data["username"],
                                        password=data["password"])
