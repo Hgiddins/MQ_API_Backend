@@ -118,7 +118,7 @@ class QMgrSystemReport:
 
 
 
-def post_chatbot_query_and_get_response(query, objects, indicator):
+def post_chatbot_query_and_get_response(query, indicator):
     def request_json(url, method="GET", data=None):
         try:
             if method == "GET":
@@ -137,7 +137,6 @@ def post_chatbot_query_and_get_response(query, objects, indicator):
     # Step 1: Post the query and indicator to the chatbot endpoint
     data = {
         "question": query,
-        "objects" : objects,
         "indicator": indicator
     }
     post_response = request_json("chatbotquery", method="POST", data=data)
@@ -188,12 +187,12 @@ report_service.get_queue_thresholds()
 
 
 # ****testing chatbot*****:
-# response = post_chatbot_query_and_get_response("what is a 2035 error?", 'None', "systemMessage")
-# print(response)
-# response = post_chatbot_query_and_get_response("who is barack obama?", 'None', "userMessage")
-# print(response)
-# response = post_chatbot_query_and_get_response("when was he born?", 'None', "userMessage")
-# print(response)
+response = post_chatbot_query_and_get_response("what is a 2035 error?",  "systemMessage")
+print(response)
+response = post_chatbot_query_and_get_response("who is barack obama?", "userMessage")
+print(response)
+response = post_chatbot_query_and_get_response("when was he born?",  "userMessage")
+print(response)
 
 
 

@@ -129,11 +129,11 @@ class ChatBotQuery(Resource):
         data = request.get_json()
 
         # Check if required fields are present
-        if not all(field in data for field in ["question", "objects", "indicator"]):
-            return {"message": "Missing required fields. Ensure 'question', 'objects' and 'indicator' are provided."}, 400
+        if not all(field in data for field in ["question", "indicator"]):
+            return {"message": "Missing required fields. Ensure 'question' and 'indicator' are provided."}
 
         # Store the query details in the cache
-        cache.set('query', [data["question"], data["objects"], data["indicator"]])
+        cache.set('query', [data["question"], data["indicator"]])
 
         return {"message": "Query stored successfully."}
 
@@ -142,17 +142,17 @@ class ChatBotQuery(Resource):
         if not query_details:
             return {"message": "No query found in cache."}
 
-        question, objects, indicator = query_details
+        question, indicator = query_details
 
         if indicator == "systemMessage":
-            response = get_error_message_chatbot_response(retrieval_chain, conversation_chain, question, objects)
+            response = get_error_message_chatbot_response(retrieval_chain, conversation_chain, question)
             cache.delete('query')  # Clear the cache after processing the query
-            return response
+            return {"chatbotresponse": response}
 
         elif indicator == "userMessage":
             response = get_general_chatbot_response(retrieval_chain, conversation_chain, question)
             cache.delete('query')  # Clear the cache after processing the query
-            return response
+            return {"chatbotresponse": response}
 
         else:
             return {"message": "Invalid indicator value."}
