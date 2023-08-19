@@ -209,12 +209,12 @@ report_service.get_queue_thresholds()
 
 
 # ****testing chatbot*****:
-# response = post_chatbot_query_and_get_response("what is a 2035 issue?",  "systemMessage")
-# print(response)
-# response = post_chatbot_query_and_get_response("who is barack obama?", "userMessage")
-# print(response)
-# response = post_chatbot_query_and_get_response("when was he born?",  "userMessage")
-# print(response)
+response = post_chatbot_query_and_get_response("what is a 2035 issue?",  "systemMessage")
+print(response)
+response = post_chatbot_query_and_get_response("When did the911 attadks happen", "userMessage")
+print(response)
+response = post_chatbot_query_and_get_response("when was he born?",  "userMessage")
+print(response)
 
 
 

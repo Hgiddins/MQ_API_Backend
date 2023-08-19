@@ -163,6 +163,11 @@ class QueueThresholdConfig(Resource):
 class ChatBotQuery(Resource):
 
     def post(self):
+        # Check if 'query' is already in the cache
+        existing_query = cache.get('query')
+        if existing_query:
+            return {"message": "Please wait, one question at a time..."}
+
         data = request.get_json()
 
         # Check if required fields are present
