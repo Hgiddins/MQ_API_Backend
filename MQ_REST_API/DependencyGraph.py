@@ -55,6 +55,7 @@ class DependencyGraph:
                 self.add_dependency(self.indirect_dependencies, queue.target_qmgr_name, queue.target_queue_name,
                                     indirect_dependency_target)
 
+
         for channel in channels:
             if isinstance(channel, SenderChannel):
                 # Direct dependency of sender channel

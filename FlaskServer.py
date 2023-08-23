@@ -108,6 +108,8 @@ class IssueListResource(Resource):
             if not all(field in data for field in ["object_type", "object_name"]):
                 return {"message": "Missing required fields. Ensure each issue has 'object_type' and 'object_name'."}
 
+            data['object_details'] = 'N/A'
+
             # Depending on the object type, search in the appropriate cache and add object details to data
             if data['object_type'] == 'application':
                 applications = cache.get('all_applications')
@@ -299,6 +301,9 @@ api.add_resource(IssueListResource, '/issues')
 ############################################################################################################
 #                                       Run, Certificate, Threading                                        #
 ############################################################################################################
+
+
+
 if __name__ == "__main__":
     # app.run(debug=True)
     app.run(debug=True, ssl_context=("cert.pem", "key.pem"), threaded = True)

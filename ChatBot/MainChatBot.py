@@ -103,8 +103,8 @@ def get_general_chatbot_response(retrieval_chain, conversation_chain, user_query
 
     documentation_context = retrieval_chain({"question": context_prompt})['answer']
 
-    troubleshoot_prompt = """Answer the question. You have been provided context which MIGHT be relevant; if it is not relevant then you do not use it: 
-    *Question:\n""" + user_query + "\n\nIBMMQ Documentation reference:\n"+documentation_context
+    troubleshoot_prompt = """Respond to the User input. You have been provided context which MIGHT be relevant; if it is not relevant then do not use it: 
+    *User:\n""" + user_query + "\n\nIBMMQ Documentation reference:\n"+documentation_context
 
     result = conversation_chain.predict(input=troubleshoot_prompt)
     return result

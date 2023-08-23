@@ -211,9 +211,9 @@ report_service.get_queue_thresholds()
 # ****testing chatbot*****:
 response = post_chatbot_query_and_get_response("what is a 2035 issue?",  "systemMessage")
 print(response)
-response = post_chatbot_query_and_get_response("When did the911 attadks happen", "userMessage")
+response = post_chatbot_query_and_get_response("why do they occur", "userMessage")
 print(response)
-response = post_chatbot_query_and_get_response("when was he born?",  "userMessage")
+response = post_chatbot_query_and_get_response("who should i contact for help on mq issues?",  "userMessage")
 print(response)
 
 
