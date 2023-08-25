@@ -64,7 +64,7 @@ def instantiate_conversation_chain():
     Returns:
         tuple: Initialized memory and conversation chain objects.
     """
-    memory = ConversationSummaryMemory(llm=OpenAI())
+    memory = ConversationBufferMemory(llm=OpenAI())
     conversation = ConversationChain(
         llm=ChatOpenAI(temperature=0, model="gpt-3.5-turbo"),
         memory=memory
