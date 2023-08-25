@@ -106,8 +106,11 @@ def get_general_chatbot_response(retrieval_chain, conversation_chain, user_query
 
     documentation_context = retrieval_chain({"question": context_prompt})['answer']
 
-    troubleshoot_prompt = """System Prompt: \nYou are a helpful IBM MQ AI assistant. Respond to the User Prompt. You have been provided IBM MQ Documentation for context which MIGHT be relevant; if it is not relevant or the user input is not related to IBM MQ then disregard the IBM MQ contextual information: 
+    troubleshoot_prompt = """System Prompt: \nYou are a helpful IBM MQ AI assistant. If the user's query relates to 'IBM MQ', answer informatively using the IBM MQ Documentation. For unrelated queries, reply 'please stick to IBM MQ quesitons'. 
     \nUser Prompt:\n""" + user_query + "\n\nIBM MQ Documentation reference:\n"+ documentation_context
+
+    context_prompt = """[Context: IBM MQ] \n\n System Prompt: \nIf the user's query relates to 'IBM MQ', answer informatively. For unrelated queries, reply with 'No information'.
+    \nUser Prompt:\n""" + user_query
 
     print(troubleshoot_prompt)
 
