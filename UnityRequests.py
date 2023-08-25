@@ -209,12 +209,26 @@ report_service.get_queue_thresholds()
 
 
 # ****testing chatbot*****:
-response = post_chatbot_query_and_get_response("what is a 2035 issue?",  "systemMessage")
+# response = post_chatbot_query_and_get_response("what is a 2035 issue?",  "systemMessage")
+# print(response)
+# response = post_chatbot_query_and_get_response("tell me about mq", "userMessage")
+# print(response)
+# response = post_chatbot_query_and_get_response("who should i contact for help on mq issues?",  "userMessage")
+# print(response)
+# response = post_chatbot_query_and_get_response("hi?",  "userMessage")
+# print(response)
+# response = post_chatbot_query_and_get_response("pits?",  "userMessage")
+# print(response)
+# response = post_chatbot_query_and_get_response("hello",  "userMessage")
+# print(response)
+response = post_chatbot_query_and_get_response("who is obama",  "userMessage")
 print(response)
-response = post_chatbot_query_and_get_response("why do they occur", "userMessage")
+# response = post_chatbot_query_and_get_response("stains",  "userMessage")
+# print(response)
+response = post_chatbot_query_and_get_response("where are bananas red",  "userMessage")
 print(response)
-response = post_chatbot_query_and_get_response("who should i contact for help on mq issues?",  "userMessage")
-print(response)
+# response = post_chatbot_query_and_get_response("tell me about mq",  "userMessage")
+# print(response)
 
 
 
