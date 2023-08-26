@@ -87,32 +87,42 @@ def boot_chatbot():
 
 
 def get_issue_message_chatbot_response(retrieval_chain, conversation_chain, issue_information):
-    # get relevant related information from the documentation
-    context_prompt = "Provide relevant information about the causes and possible solutions to this issue: " + issue_information
+    try:
+        # get relevant related information from the documentation
+        context_prompt = "Provide relevant information about the causes and possible solutions to this issue: " + issue_information
 
-    documentation_context = retrieval_chain({"question": context_prompt})['answer']
+        documentation_context = retrieval_chain({"question": context_prompt})['answer']
 
-    troubleshoot_prompt = """Given the provided context provided give an overview of the problem in my system and how to fix it : 
-    *System Event message:\n""" + issue_information + "\n\nIBMMQ Documentation reference:\n"+documentation_context
+        troubleshoot_prompt = """System Prompt: \nYou are a helpful IBM MQ AI assistant. Given the context provided give an overview of the problem in my system and how to fix it. 
+        \nSystem Issue Message:\n""" + issue_information + "\n\nIBMMQ Documentation Reference:\n"+documentation_context
 
-    result = conversation_chain.predict(input=troubleshoot_prompt)
+        result = conversation_chain.predict(input=troubleshoot_prompt)
 
-    return result
+        return result
+
+    except Exception as e:
+        # Capture and return the error message
+        return str(e)
+
 
 def get_general_chatbot_response(retrieval_chain, conversation_chain, user_query):
-    # get relevant related information from the documentation
-    context_prompt = """[Context: IBM MQ] \n\n System Prompt: \nIf the user's query relates to 'IBM MQ', answer informatively. For unrelated queries, reply with 'No information'.
-    \nUser Prompt:\n""" + user_query
+    try:
+        # get relevant related information from the documentation
+        context_prompt = """[Context: IBM MQ] \n\n System Prompt: \nIf the user's query relates to 'IBM MQ', answer informatively. For unrelated queries, reply with 'No information'.
+        \nUser Prompt:\n""" + user_query
 
-    documentation_context = retrieval_chain({"question": context_prompt})['answer']
+        documentation_context = retrieval_chain({"question": context_prompt})['answer']
 
-    troubleshoot_prompt = """System Prompt: \nYou are a helpful IBM MQ AI assistant. If the user's query relates to 'IBM MQ', use the IBM MQ Documentation to answer informatively. For unrelated queries, reply that the question does not relate to IBM MQ and so you cannot answer it. 
-    \nUser Prompt:\n""" + user_query + "\n\nIBM MQ Documentation reference:\n"+ documentation_context
+        troubleshoot_prompt = """System Prompt: \nYou are a helpful IBM MQ AI assistant. If the user's query relates to 'IBM MQ', use the IBM MQ Documentation to answer informatively. For queries not about IBM MQ, the chatbot or technical difficulties, reply that the question does not relate to IBM MQ and so you cannot answer it. 
+        \nUser Prompt:\n""" + user_query + "\n\nIBM MQ Documentation Reference:\n" + documentation_context
 
-    print(troubleshoot_prompt)
+        result = conversation_chain.predict(input=troubleshoot_prompt)
 
-    result = conversation_chain.predict(input=troubleshoot_prompt)
-    return result
+        return result
+
+    except Exception as e:
+        # Capture and return the error message
+        return str(e)
 
 
 
