@@ -45,7 +45,7 @@ retrieval_chain, conversation_chain = None, None
 class ClientConfig(Resource):
 
     def post(self):
-        global qmgr, retrieval_chain, conversation_chain
+        global qmgr, retrieval_chain, conversation_chain, logout_flag
         data = request.get_json()
 
         # Update global client details
@@ -76,6 +76,7 @@ class ClientConfig(Resource):
 
             if qmgr_state == "running":
                 retrieval_chain, conversation_chain = boot_chatbot()
+                logout_flag = False
                 return {"message": "Login successful."}
             else:
                 return {"message": "Login failed, queue manager is not running."}
