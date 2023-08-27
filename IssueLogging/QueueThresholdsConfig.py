@@ -21,28 +21,32 @@ class QueueThresholdManager:
 
 
     def thresholdWarning(self, queue, thresholdLimit):
-        current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        current_time = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')  # ISO 8601 format
+        alert_template = {
+            "issueCode": "",
+            "startTimeStamp": current_time,
+            "generalDesc": "",
+            "technicalDetails": {
+                "maxThreshold": thresholdLimit
+            },
+            "mqobjectType": "<QUEUE>",
+            "mqobjectName": queue.queue_name,
+            "objectDetails": str(queue)
+        }
+
         if queue.current_depth == queue.max_number_of_messages:
-            return {
-                "object_type": "queue",
-                "issue_code": "QUEUE_FULL",
-                "queue_name": queue.queue_name,
-                "max_threshold": thresholdLimit,
-                "message": "The queue is 100% full. Immediate action required!",
-                "timestamp": current_time,
-                "object_details": str(queue)
-            }
+            alert_template["issueCode"] = "QUEUE_FULL"
+            alert_template["generalDesc"] = "The queue is 100% full. Immediate action required!"
         elif queue.threshold >= thresholdLimit:
-            return {
-                "object_type": "queue",
-                "issue_code": "THRESHOLD_EXCEEDED",
-                "queue_name": queue.queue_name,
-                "max_threshold": thresholdLimit,
-                "message": f"The queue has exceeded the {thresholdLimit * 100}% threshold limit. Please take necessary actions to avoid potential issues.",
-                "timestamp": current_time,
-                "object_details": str(queue)
-            }
+            alert_template["issueCode"] = "THRESHOLD_EXCEEDED"
+            alert_template[
+                "generalDesc"] = f"The queue has exceeded the {thresholdLimit * 100}% threshold limit. Please take necessary actions to avoid potential issues."
         else:
             return None
+
+        return alert_template
+
+
+
 
 
