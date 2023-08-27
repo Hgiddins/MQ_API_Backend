@@ -15,15 +15,17 @@ from IssueLogging import ThreadsafeIssueList, QueueThresholdsConfig
 # Suppress only the single InsecureRequestWarning from urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# Global flag to indicate if a user has logged out
-logout_flag = False
-
 # setting up server
 app = Flask(__name__)
 api = Api(app)
 
 # cache for constantly updated MQ objects
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+
+# Global flag to indicate if a user has logged out
+cache.set('login_state', False)
+
+
 
 # Insantiating threadsafe queue threshold configuration
 queueThresholdManager = QueueThresholdsConfig.QueueThresholdManager()
@@ -45,7 +47,7 @@ retrieval_chain, conversation_chain = None, None
 class ClientConfig(Resource):
 
     def post(self):
-        global qmgr, retrieval_chain, conversation_chain, logout_flag
+        global qmgr, retrieval_chain, conversation_chain
         data = request.get_json()
 
         # Update global client details
@@ -76,7 +78,7 @@ class ClientConfig(Resource):
 
             if qmgr_state == "running":
                 retrieval_chain, conversation_chain = boot_chatbot()
-                logout_flag = False
+                cache.set('login_state', True)
                 return {"message": "Login successful."}
             else:
                 return {"message": "Login failed, queue manager is not running."}
@@ -93,13 +95,13 @@ class ClientConfig(Resource):
 class Logout(Resource):
 
     def post(self):
-        global client, logout_flag
+        global client, login_flag
 
         # Wipe data that might be sensitive or user-specific
         client = None  # Reset the MQ_REST_API client object
         cache.clear()  # Clear the cache
         issueList.clear_issues()  # Clear the list of issues
-        logout_flag = True  # Set the logout flag to true
+        cache.set('login_state', False)  # Set the login flag to False
 
         return {"message": "Logged out successfully."}
 
@@ -189,8 +191,7 @@ class ChatBotQuery(Resource):
 
     def post(self):
         # Check if 'query' is already in the cache
-        global logout_flag
-        if logout_flag:
+        if not cache.get('login_state'):
             return {"message": "Logged out."}
         existing_query = cache.get('query')
         if existing_query:
@@ -208,8 +209,7 @@ class ChatBotQuery(Resource):
         return {"message": "Query stored successfully."}
 
     def get(self):
-        global logout_flag
-        if logout_flag:
+        if not cache.get('login_state'):
             return {"message": "Logged out."}
         query_details = cache.get('query')
         if not query_details:
