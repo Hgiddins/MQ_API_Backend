@@ -211,6 +211,8 @@ class ChatBotQuery(Resource):
     def get(self):
         if not cache.get('login_state'):
             return {"message": "Logged out."}
+
+        print(cache.get('test_flag'))
         query_details = cache.get('query')
         if not query_details:
             return {"message": "No query found in cache."}
