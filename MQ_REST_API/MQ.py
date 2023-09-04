@@ -80,8 +80,10 @@ class Client:
         return qmgrs[0]
 
     def get_all_queues(self):
-        response = self.get_request(f"/ibmmq/rest/v1/admin/qmgr/{self.qmgr}/queue?name=DEV*&attributes=*&status=*")
+        response = self.get_request(f"/ibmmq/rest/v1/admin/qmgr/{self.qmgr}/queue?attributes=*&status=*")
+
         queue_json = json.loads(response)
+
         queues = Parser.parse_queue_response(queue_json)
 
         # for q in queues:
@@ -192,6 +194,9 @@ class Parser:
         queues = []
 
         for queue_json in queue_response_json['queue']:
+            if "SYSTEM" in queue_json['name'] or "ADMIN" in queue_json['name']:
+                continue
+
             queue_type = queue_json['type']
             if queue_type == 'alias':
                 queue = AliasQueue()

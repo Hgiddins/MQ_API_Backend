@@ -89,7 +89,7 @@ def boot_chatbot():
 def get_issue_message_chatbot_response(retrieval_chain, conversation_chain, issue_information):
     try:
         # get relevant related information from the documentation
-        context_prompt = "Provide relevant information about the causes and possible solutions to this issue: " + issue_information
+        context_prompt = "Provide relevant information about the causes and possible solutions to this issue. Where relevant nclude reference hyperlinks: " + issue_information
 
         documentation_context = retrieval_chain({"question": context_prompt})['answer']
 
@@ -113,7 +113,7 @@ def get_general_chatbot_response(retrieval_chain, conversation_chain, user_query
 
         documentation_context = retrieval_chain({"question": context_prompt})['answer']
 
-        troubleshoot_prompt = """System Prompt: \nYou are a helpful IBM MQ AI assistant. If the user's query relates to 'IBM MQ', use the IBM MQ Documentation to answer informatively. For queries not about IBM MQ, the chatbot or technical difficulties, reply that the question does not relate to IBM MQ and so you cannot answer it. 
+        troubleshoot_prompt = """System Prompt: \nYou are a helpful IBM MQ AI assistant. If the user's query relates to 'IBM MQ', use the IBM MQ Documentation to answer informatively. For queries not about IBM MQ, or general pleasantries, reply that the question does not relate to IBM MQ and so you cannot answer it. 
         \nUser Prompt:\n""" + user_query + "\n\nIBM MQ Documentation Reference:\n" + documentation_context
 
         result = conversation_chain.predict(input=troubleshoot_prompt)
