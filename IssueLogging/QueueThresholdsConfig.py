@@ -27,7 +27,7 @@ class QueueThresholdManager:
             "startTimeStamp": current_time,
             "generalDesc": "",
             "technicalDetails": {
-                "maxThreshold": thresholdLimit
+                "maxThreshold": str(thresholdLimit)
             },
             "mqobjectType": "<QUEUE>",
             "mqobjectName": queue.queue_name,
