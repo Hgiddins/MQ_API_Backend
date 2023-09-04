@@ -196,7 +196,8 @@ class Parser:
         for queue_json in queue_response_json['queue']:
             if "SYSTEM" in queue_json['name'] or "ADMIN" in queue_json['name']:
                 continue
-
+            else:
+                print(queue_json['name'])
             queue_type = queue_json['type']
             if queue_type == 'alias':
                 queue = AliasQueue()
@@ -224,16 +225,24 @@ class Parser:
             else:
                 continue
 
-            queue.current_depth = queue_json['status']['currentDepth'] #might break
+            if queue.type_name == 'Alias':
+                queue.current_depth = 'N/A'
+                queue.max_number_of_messages = 'N/A'
+                queue.max_message_length = 'N/A'
+                queue.time_created = 'N/A'
+                queue.threshold = 'N/A'
+            else:
+                queue.current_depth = queue_json['status']['currentDepth'] #might break
+                queue.max_number_of_messages = queue_json['storage']['maximumDepth']
+                queue.max_message_length = queue_json['storage']['maximumMessageLength']
+                queue.time_created = queue_json['timestamps']['created']
+                queue.threshold = queue.current_depth / queue.max_number_of_messages
             queue.queue_name = queue_json['name']
-            queue.max_number_of_messages = queue_json['storage']['maximumDepth']
-            queue.max_message_length = queue_json['storage']['maximumMessageLength']
             queue.inhibit_get = queue_json['general']['inhibitGet']
             queue.inhibit_put = queue_json['general']['inhibitPut']
             queue.description = queue_json['general']['description']
-            queue.time_created = queue_json['timestamps']['created']
             queue.time_altered = queue_json['timestamps']['altered']
-            queue.threshold = queue.current_depth / queue.max_number_of_messages
+
 
 
             queues.append(queue)
