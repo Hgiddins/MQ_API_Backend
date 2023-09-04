@@ -180,8 +180,7 @@ report_service = QMgrSystemReport(qmanager_name= qmgr, base_url=base_url, userna
 
 # testing posting threshold data
 queue_threshold_config_payload = {
-    "DEV.QUEUE.5": 0.00,
-    "DEV.QUEUE.2": 0.001
+    "DEV.QUEUE.5": 0.90
 }
 report_service.post_queue_thresholds(queue_threshold_config_payload)
 report_service.get_queue_thresholds()
@@ -192,17 +191,13 @@ report_service.generate_report()
 # get threshold issue
 error_data = [
     {
-        "object_type": "application",
-        "object_name": "38C9D06400090040"
-    },
-    {
-        "object_type": "queue",
-        "object_name": "DEV.QUEUE.5"
+        "mqobjectType": "application",
+        "mqobjectName": "38C9D06400090040"
     }
 ]
 
 # Post the error data
-report_service.post_issue(error_data)
+# report_service.post_issue(error_data)
 report_service.get_issues()
 report_service.get_queue_thresholds()
 

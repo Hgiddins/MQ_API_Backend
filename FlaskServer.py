@@ -130,28 +130,28 @@ class IssueListResource(Resource):
 
         for data in issues:
             # Check if required fields are present in each issue
-            if not all(field in data for field in ["object_type", "object_name"]):
-                return {"message": "Missing required fields. Ensure each issue has 'object_type' and 'object_name'."}
+            if not all(field in data for field in ["mqobjectType", "mqobjectName"]):
+                return {"message": "Missing required fields. Ensure each issue has 'mqobjectType' and 'mqobjectName'."}
 
             data['object_details'] = 'N/A'
 
             # Depending on the object type, search in the appropriate cache and add object details to data
-            if data['object_type'] == 'application':
+            if data['mqobjectType'] == 'application':
                 applications = cache.get('all_applications')
                 for app in applications:
-                    if app.conn == data['object_name']:
+                    if app.conn == data['mqobjectName']:
                         data['object_details'] = app.to_dict()
                         break
-            elif data['object_type'] == 'channel':
+            elif data['mqobjectType'] == 'channel':
                 channels = cache.get('all_channels')
                 for channel in channels:
-                    if channel.channel_name == data['object_name']:
+                    if channel.channel_name == data['mqobjectName']:
                         data['object_details'] = channel.to_dict()
                         break
-            elif data['object_type'] == 'queue':
+            elif data['mqobjectType'] == 'queue':
                 queues = cache.get('all_queues')
                 for queue in queues:
-                    if queue.queue_name == data['object_name']:
+                    if queue.queue_name == data['mqobjectName']:
                         data['object_details'] = queue.to_dict()
                         break
 
@@ -212,7 +212,7 @@ class ChatBotQuery(Resource):
         if not cache.get('login_state'):
             return {"message": "Logged out."}
 
-        print(cache.get('test_flag'))
+        print(cache.get('login_state'))
         query_details = cache.get('query')
         if not query_details:
             return {"message": "No query found in cache."}
