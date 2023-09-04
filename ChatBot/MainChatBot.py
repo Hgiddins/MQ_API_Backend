@@ -79,7 +79,7 @@ def boot_chatbot():
     PERSIST = False
     setup_openai_authorization()
     # loader = TextLoader("ChatBot/MQ_DOCS_2035.txt")
-    loader = PyPDFLoader("ChatBot/mqIssuesDocu.pdf")
+    loader = PyPDFLoader("ChatBot/mqIssuesDoc.pdf")
     index = get_index(PERSIST, loader)
     retrieval_chain = instantiate_retrieval_chain(index)
     memory, conversation_chain = instantiate_conversation_chain()

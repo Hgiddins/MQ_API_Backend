@@ -35,10 +35,10 @@ class QueueThresholdManager:
         }
 
         if queue.current_depth == queue.max_number_of_messages:
-            alert_template["issueCode"] = "QUEUE_FULL"
+            alert_template["issueCode"] = "Queue_Full"
             alert_template["generalDesc"] = "The queue is 100% full. Immediate action required!"
         elif queue.threshold >= thresholdLimit:
-            alert_template["issueCode"] = "THRESHOLD_EXCEEDED"
+            alert_template["issueCode"] = "Threshold_Exceeded"
             alert_template[
                 "generalDesc"] = f"The queue has exceeded the {thresholdLimit * 100}% threshold limit. Please take necessary actions to avoid potential issues."
         else:
