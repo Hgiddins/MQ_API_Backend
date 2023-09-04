@@ -231,14 +231,25 @@ class Parser:
                 queue.max_message_length = 0
                 queue.time_created = 0
                 queue.threshold = 0
+                queue.inhibit_get = queue_json['general']['inhibitGet']
+
+            elif queue.type_name == 'Remote':
+                queue.current_depth = 0
+                queue.max_number_of_messages = 0
+                queue.max_message_length = 0
+                queue.time_created = 0
+                queue.threshold = 0
+                queue.inhibit_get = 'N/A'
+
             else:
                 queue.current_depth = queue_json['status']['currentDepth'] #might break
                 queue.max_number_of_messages = queue_json['storage']['maximumDepth']
                 queue.max_message_length = queue_json['storage']['maximumMessageLength']
                 queue.time_created = queue_json['timestamps']['created']
                 queue.threshold = queue.current_depth / queue.max_number_of_messages
+                queue.inhibit_get = queue_json['general']['inhibitGet']
+
             queue.queue_name = queue_json['name']
-            queue.inhibit_get = queue_json['general']['inhibitGet']
             queue.inhibit_put = queue_json['general']['inhibitPut']
             queue.description = queue_json['general']['description']
             queue.time_altered = queue_json['timestamps']['altered']
