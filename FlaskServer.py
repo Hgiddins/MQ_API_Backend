@@ -76,10 +76,11 @@ class ClientConfig(Resource):
         try:
             print(client.get_qmgr().state)
             qmgr_state = client.get_qmgr().state
-
+            print('0test')
             if qmgr_state == "running":
+                print('1test')
                 retrieval_chain, conversation_chain = boot_chatbot()
-                cache.set('login_state', True)
+                print('2test')
                 return {"message": "Login successful."}
             else:
                 return {"message": "Login failed, queue manager is not running."}
