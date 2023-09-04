@@ -260,9 +260,10 @@ class GetAllQueues(Resource):
                 currentQueueThreshold = queueThresholdManager.defaultThreshold
                 queueThresholdManager.update({queue.queue_name: currentQueueThreshold})
 
-            issue_msg = queueThresholdManager.thresholdWarning(queue, currentQueueThreshold)  # Call the thresholdWarning method of the Queue object
-            if issue_msg:
-                issueList.add_issue(issue_msg)  # Directly add the issue message to the global issueLog
+            if queue.type_name == 'Local':
+                issue_msg = queueThresholdManager.thresholdWarning(queue, currentQueueThreshold)  # Call the thresholdWarning method of the Queue object
+                if issue_msg:
+                    issueList.add_issue(issue_msg)  # Directly add the issue message to the global issueLog
             queues_as_dicts.append(queue.to_dict())
 
         # No need to interact with issueCache. Just return the list of queues.
