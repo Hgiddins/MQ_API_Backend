@@ -74,6 +74,7 @@ class ClientConfig(Resource):
         cache.set('qmgr', data["qmgr"])
 
         try:
+            print(client.get_qmgr().state)
             qmgr_state = client.get_qmgr().state
 
             if qmgr_state == "running":
