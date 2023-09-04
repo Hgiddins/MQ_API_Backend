@@ -239,7 +239,7 @@ class Parser:
                 queue.max_message_length = 0
                 queue.time_created = 0
                 queue.threshold = 0
-                queue.inhibit_get = 'N/A'
+                queue.inhibit_get = False
 
             else:
                 queue.current_depth = queue_json['status']['currentDepth'] #might break
