@@ -124,6 +124,17 @@ class QMgrSystemReport:
                                 data=issue_data)  # replace 'your_error_endpoint' with your actual endpoint
         print(response)
 
+    def post_resolved_issue(self, mqobject_name, issue_code):
+        """
+        Posts a resolved issue to the server.
+        """
+        data = {
+            "mqobjectName": mqobject_name,
+            "issueCode": issue_code
+        }
+        response = self.request_json("resolve", method="POST", data=data)
+        print(response)
+
 
 
 
@@ -180,7 +191,7 @@ report_service = QMgrSystemReport(qmanager_name= qmgr, base_url=base_url, userna
 
 # testing posting threshold data
 queue_threshold_config_payload = {
-    "DEV.QUEUE.5": 0.90
+    "DEV.QUEUE.5": 0.00
 }
 report_service.post_queue_thresholds(queue_threshold_config_payload)
 report_service.get_queue_thresholds()
@@ -192,14 +203,23 @@ report_service.generate_report()
 error_data = [
     {
         "mqobjectType": "application",
-        "mqobjectName": "38C9D06400090040"
+        "mqobjectName": "38C9D06400090040",
+        "issueCode" :"nuts"
     }
 ]
 
 # Post the error data
-# report_service.post_issue(error_data)
+report_service.post_issue(error_data)
+mqobject_name = "DEV.QUEUE.5"
+issue_code = "Threshold_Exceeded"  # Replace this with your actual issue code
+report_service.post_resolved_issue(mqobject_name, issue_code)
+mqobject_name = "38C9D06400090040"
+issue_code = "nuts"  # Replace this with your actual issue code
+report_service.post_resolved_issue(mqobject_name, issue_code)
 report_service.get_issues()
+
 report_service.get_queue_thresholds()
+
 
 
 

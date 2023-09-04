@@ -1,5 +1,5 @@
 import os
-
+import threading
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import TextLoader
@@ -17,6 +17,28 @@ from langchain.document_loaders import PyPDFLoader
 from ChatBot.ChatBotConstants import APIKEY
 
 
+# threadsafe chatbot to make logging in and out secure with chatbot data
+class ThreadSafeChatbot:
+    def __init__(self):
+        self.retrieval_chain = None
+        self.conversation_chain = None
+        self.lock = threading.Lock()
+
+    def boot(self):
+        with self.lock:
+            self.retrieval_chain, self.conversation_chain = boot_chatbot()
+
+    def get_response(self, chain_type, question):
+        with self.lock:
+            if chain_type == "systemMessage":
+                return get_issue_message_chatbot_response(self.retrieval_chain, self.conversation_chain, question)
+            elif chain_type == "userMessage":
+                return get_general_chatbot_response(self.retrieval_chain, self.conversation_chain, question)
+            else:
+                return "Invalid indicator value."
+
+
+# utility functions
 def setup_openai_authorization():
     """
     Sets up OpenAI's API authorization using environment variables or constants.

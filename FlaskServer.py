@@ -3,7 +3,7 @@ from flask_restful import Api, Resource
 from MQ_REST_API.DependencyGraph import DependencyGraph
 from flask_caching import Cache
 import MQ_REST_API.MQ
-from ChatBot.MainChatBot import boot_chatbot, get_issue_message_chatbot_response, get_general_chatbot_response
+from ChatBot.MainChatBot import boot_chatbot, get_issue_message_chatbot_response, get_general_chatbot_response, ThreadSafeChatbot
 import urllib3
 from IssueLogging import ThreadsafeIssueList, QueueThresholdsConfig
 
@@ -23,20 +23,25 @@ api = Api(app)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 # Global flag to indicate if a user has logged out
-
+resolved_issues = Cache(app, config={
+    'CACHE_TYPE': 'simple',
+    'CACHE_DEFAULT_TIMEOUT': 300  # 5 minutes in seconds
+})
 
 
 # Insantiating threadsafe queue threshold configuration
 queueThresholdManager = QueueThresholdsConfig.QueueThresholdManager()
 
 # Logging of issues - threadsafe
-issueList = ThreadsafeIssueList.ThreadSafeIssueList()
+issue_list = ThreadsafeIssueList.ThreadSafeIssueList()
 
 # global client, must first be posted to for MQ_REST_API to work
 client = None
 
 # Chat Bot connection and instantiation
-retrieval_chain, conversation_chain = None, None
+# retrieval_chain, conversation_chain = None, None
+chatbot = ThreadSafeChatbot()
+
 
 
 ############################################################################################################
@@ -46,8 +51,12 @@ retrieval_chain, conversation_chain = None, None
 class ClientConfig(Resource):
 
     def post(self):
-        global qmgr, retrieval_chain, conversation_chain
+        global qmgr
         data = request.get_json()
+
+        # clear caches
+        resolved_issues.clear()
+        cache.clear()
 
         # Update global client details
         global client
@@ -78,7 +87,8 @@ class ClientConfig(Resource):
 
             if qmgr_state == "running":
 
-                retrieval_chain, conversation_chain = boot_chatbot()
+                print("booting a new chatbot")
+                chatbot.boot()
 
                 return {"message": "Login successful."}
             else:
@@ -102,8 +112,8 @@ class Logout(Resource):
         # Wipe data that might be sensitive or user-specific
         client = None  # Reset the MQ_REST_API client object
         cache.clear()  # Clear the cache
-        issueList.clear_issues()  # Clear the list of issues
-        cache.set('login_state', False)  # Set the login flag to False
+        issue_list.clear_issues()  # Clear the list of issues
+        resolved_issues.clear()
 
         return {"message": "Logged out successfully."}
 
@@ -114,14 +124,20 @@ class Logout(Resource):
 
 class IssueListResource(Resource):
 
-    # Step 2: Implement the `get` method for this resource to fetch all issues
     def get(self):
-        issues = issueList.get_issues()
+        issues = issue_list.get_issues()
 
-        # Step 3: After fetching, clear the issues from the issue list
-        issueList.clear_issues()
+        # After fetching, clear the issues from the issue list
+        issue_list.clear_issues()
 
-        return {"issues": issues}
+        # Filter out issues that are in the 'resolved_issues' cache.
+        unresolved_issues = []
+        for issue in issues:
+            cache_key = (issue['mqobjectName'], issue['issueCode'])
+            if not resolved_issues.get(cache_key):
+                unresolved_issues.append(issue)
+
+        return {"issues": unresolved_issues}
 
 
     def post(self):
@@ -158,7 +174,7 @@ class IssueListResource(Resource):
                         break
 
             # append the issue to the issue list
-            issueList.add_issue(data)
+            issue_list.add_issue(data)
 
         return {"message": f"{len(issues)} issues added successfully!"}
 
@@ -183,6 +199,36 @@ class QueueThresholdConfig(Resource):
         queueThresholdManager.update(data)  # Update the thresholds using the manager
 
         return {"message": "Thresholds updated successfully."}
+
+
+class ResolveIssue(Resource):
+    def post(self):
+        data = request.get_json(force=True)
+        mqobject_name = data.get('mqobjectName')
+        issue_code = data.get('issueCode')
+
+        if not mqobject_name or not issue_code:
+            return {"message": "Both 'mqobjectName' and 'issueCode' are required."}, 200
+
+        # Create a unique key for this combination of mqobjectName and issueCode
+        cache_key = (mqobject_name, issue_code)
+        resolved_issues.set(cache_key, True)
+
+        return {"message": "(mqobjectName, issueCode) pair added to resolved issues."}, 200
+
+    def get(self):
+        mqobject_name = request.args.get('mqobjectName')
+        issue_code = request.args.get('issueCode')
+
+        if not mqobject_name or not issue_code:
+            return {"message": "Both 'mqobjectName' and 'issueCode' are required."}, 200
+
+        cache_key = (mqobject_name, issue_code)
+        if resolved_issues.get(cache_key):
+            return {"status": "resolved", "mqobjectName": mqobject_name, "issueCode": issue_code}, 200
+        else:
+            return {"status": "unresolved", "mqobjectName": mqobject_name, "issueCode": issue_code}, 200
+
 
 
 ############################################################################################################
@@ -215,19 +261,10 @@ class ChatBotQuery(Resource):
             return {"message": "No query found in cache."}
 
         question, indicator = query_details
+        response = chatbot.get_response(indicator, question)
 
-        if indicator == "systemMessage":
-            response = get_issue_message_chatbot_response(retrieval_chain, conversation_chain, question)
-            cache.delete('query')  # Clear the cache after processing the query
-            return {"message": response}
-
-        elif indicator == "userMessage":
-            response = get_general_chatbot_response(retrieval_chain, conversation_chain, question)
-            cache.delete('query')  # Clear the cache after processing the query
-            return {"message": response}
-
-        else:
-            return {"message": "Invalid indicator value."}
+        cache.delete('query')  # Clear the cache after processing the query
+        return {"message": response}
 
 
 ############################################################################################################
@@ -263,7 +300,7 @@ class GetAllQueues(Resource):
             if queue.type_name == 'Local':
                 issue_msg = queueThresholdManager.thresholdWarning(queue, currentQueueThreshold)  # Call the thresholdWarning method of the Queue object
                 if issue_msg:
-                    issueList.add_issue(issue_msg)  # Directly add the issue message to the global issueLog
+                    issue_list.add_issue(issue_msg)  # Directly add the issue message to the global issueLog
             queues_as_dicts.append(queue.to_dict())
 
         # No need to interact with issueCache. Just return the list of queues.
@@ -326,6 +363,7 @@ api.add_resource(ChatBotQuery, '/chatbotquery')
 api.add_resource(QueueThresholdConfig, '/queueThresholdManager')
 api.add_resource(IssueListResource, '/issues')
 api.add_resource(Logout, "/logout")
+api.add_resource(ResolveIssue, '/resolve', '/check')
 
 
 ############################################################################################################
