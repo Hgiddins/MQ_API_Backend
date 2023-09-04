@@ -12,6 +12,7 @@ from langchain.llms import OpenAI
 from langchain.vectorstores import Chroma
 from langchain.memory import ConversationBufferMemory
 from langchain.memory import ConversationBufferWindowMemory
+from langchain.document_loaders import PyPDFLoader
 
 from ChatBot.ChatBotConstants import APIKEY
 
@@ -77,7 +78,8 @@ def instantiate_conversation_chain():
 def boot_chatbot():
     PERSIST = False
     setup_openai_authorization()
-    loader = TextLoader("ChatBot/MQ_DOCS_2035.txt")
+    # loader = TextLoader("ChatBot/MQ_DOCS_2035.txt")
+    loader = PyPDFLoader("ChatBot/mqIssuesDoc.pdf")
     index = get_index(PERSIST, loader)
     retrieval_chain = instantiate_retrieval_chain(index)
     memory, conversation_chain = instantiate_conversation_chain()
@@ -89,11 +91,11 @@ def boot_chatbot():
 def get_issue_message_chatbot_response(retrieval_chain, conversation_chain, issue_information):
     try:
         # get relevant related information from the documentation
-        context_prompt = "Provide relevant information about the causes and possible solutions to this issue. Where relevant nclude reference hyperlinks: " + issue_information
+        context_prompt = "Provide relevant information about the causes and possible solutions to this issue (include IBM Documentation hyperlinks where possible): " + issue_information
 
         documentation_context = retrieval_chain({"question": context_prompt})['answer']
 
-        troubleshoot_prompt = """System Prompt: \nYou are a helpful IBM MQ AI assistant. Given the context provided give an overview of the problem in my system and how to fix it. 
+        troubleshoot_prompt = """System Prompt: \nYou are a helpful IBM MQ AI assistant. Given the context provided give an overview of the problem in my system and how to fix it (include IBM Documentation hyperlinks where possible). 
         \nSystem Issue Message:\n""" + issue_information + "\n\nIBMMQ Documentation Reference:\n"+documentation_context
 
         result = conversation_chain.predict(input=troubleshoot_prompt)
@@ -127,7 +129,7 @@ def get_general_chatbot_response(retrieval_chain, conversation_chain, user_query
 
 
 
-# testing
+# # testing
 # retrieval_chain, conversation_chain = boot_chatbot()
 # question = "what is a 2035 issue?"
 # objects = "none"
