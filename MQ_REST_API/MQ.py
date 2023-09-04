@@ -226,11 +226,11 @@ class Parser:
                 continue
 
             if queue.type_name == 'Alias':
-                queue.current_depth = 'N/A'
-                queue.max_number_of_messages = 'N/A'
-                queue.max_message_length = 'N/A'
-                queue.time_created = 'N/A'
-                queue.threshold = 'N/A'
+                queue.current_depth = 0
+                queue.max_number_of_messages = 0
+                queue.max_message_length = 0
+                queue.time_created = 0
+                queue.threshold = 0
             else:
                 queue.current_depth = queue_json['status']['currentDepth'] #might break
                 queue.max_number_of_messages = queue_json['storage']['maximumDepth']
