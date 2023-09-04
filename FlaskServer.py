@@ -86,6 +86,7 @@ class ClientConfig(Resource):
                 return {"message": "Login failed, queue manager is not running."}
 
         except Exception as e:
+            print(e)
             # catch the exception related to qmgr not existing.
             return {"message": f"Login failed, no queue manager named {data['qmgr']}."}
 
