@@ -23,7 +23,6 @@ api = Api(app)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 # Global flag to indicate if a user has logged out
-cache.set('login_state', False)
 
 
 
@@ -76,11 +75,11 @@ class ClientConfig(Resource):
         try:
             print(client.get_qmgr().state)
             qmgr_state = client.get_qmgr().state
-            print('0test')
+
             if qmgr_state == "running":
-                print('1test')
+
                 retrieval_chain, conversation_chain = boot_chatbot()
-                print('2test')
+
                 return {"message": "Login successful."}
             else:
                 return {"message": "Login failed, queue manager is not running."}
@@ -193,9 +192,7 @@ class QueueThresholdConfig(Resource):
 class ChatBotQuery(Resource):
 
     def post(self):
-        # Check if 'query' is already in the cache
-        if not cache.get('login_state'):
-            return {"message": "Logged out."}
+
         existing_query = cache.get('query')
         if existing_query:
             return {"message": "Please wait, one question at a time..."}
@@ -212,10 +209,7 @@ class ChatBotQuery(Resource):
         return {"message": "Query stored successfully."}
 
     def get(self):
-        if not cache.get('login_state'):
-            return {"message": "Logged out."}
 
-        print(cache.get('login_state'))
         query_details = cache.get('query')
         if not query_details:
             return {"message": "No query found in cache."}

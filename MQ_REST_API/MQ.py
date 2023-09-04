@@ -242,6 +242,7 @@ class Parser:
             queue.inhibit_put = queue_json['general']['inhibitPut']
             queue.description = queue_json['general']['description']
             queue.time_altered = queue_json['timestamps']['altered']
+            print(queue.queue_name, queue.type_name)
 
 
 
