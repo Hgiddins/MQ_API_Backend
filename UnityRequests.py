@@ -224,10 +224,10 @@ report_service.get_queue_thresholds()
 
 
 # ****testing chatbot*****:
-response = post_chatbot_query_and_get_response('{ "issueCode": "THRESHOLD_EXCEEDED", "startTimeStamp": "2023-09-04T14:25:30", "generalDesc": "The queue has exceeded the 80.0% threshold limit. Please take necessary actions to avoid potential issues.", "technicalDetails": { "maxThreshold": 0.8 }, "mqobjectType": "<QUEUE>", "mqobjectName": "DEV.QUEUE.2", "objectDetails": "QueueObjectRepresentationForDEV.QUEUE.2" }',  "systemMessage")
+response = post_chatbot_query_and_get_response('{ "issueCode": "THRESHOLD_EXCEEDED", "startTimeStamp": "2023-09-04T14:25:30", "generalDesc": "The queue has exceeded the 80.0% threshold limit. Please take necessary actions to avoid potential issues.", "technicalDetails": { "maxThreshold": 0.8 }, "mqobjectType": "<QUEUE>", "mqobjectName": "DEV.QUEUE.2", "objectDetails": "QueueObjectRepresentationForDEV.QUEUE.2" }',  "userMessage")
 print(response)
-# response = post_chatbot_query_and_get_response("tell me about mq", "userMessage")
-# print(response)
+response = post_chatbot_query_and_get_response("tell me about mq", "userMessage")
+print(response)
 # response = post_chatbot_query_and_get_response("who should i contact for help on mq issues?",  "userMessage")
 # print(response)
 # response = post_chatbot_query_and_get_response("hi?",  "userMessage")

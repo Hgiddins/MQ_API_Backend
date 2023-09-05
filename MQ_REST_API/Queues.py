@@ -1,19 +1,24 @@
 from abc import ABC, abstractmethod
 
+# self.inhibit_get = None
+# self.time_created = None
+# self.max_number_of_messages = None
+# self.max_message_length = None
+# self.current_depth = None
+# self.holds_messages = None
 class Queue(ABC):
     def __init__(self):
         self.queue_name = None
-        self.max_number_of_messages = None
-        self.max_message_length = None
-        self.inhibit_put = None
-        self.inhibit_get = None
-        self.description = None
-        self.time_created = None
-        self.time_altered = None
-        self.current_depth = None
-        self.holds_messages = None
-        self.messages = []
         self.type_name = None
+
+        self.inhibit_put = None
+
+        self.description = None
+
+        self.time_altered = None
+
+
+
 
     @abstractmethod
     def get_type_name(self):
@@ -34,8 +39,8 @@ class RemoteQueue(Queue):
         self.target_queue_name = None
         self.target_qmgr_name = None
         self.transmission_queue_name = None
-        self.current_depth = 0
-        self.holds_messages = False
+        # self.current_depth = 0
+        # self.holds_messages = False
 
     def get_type_name(self):
         return RemoteQueue.type_name
@@ -46,9 +51,14 @@ class TransmissionQueue(Queue):
 
     def __init__(self):
         super().__init__()
-        self.open_input_count = None
-        self.open_output_count = None
-        self.holds_messages = True
+        # self.open_input_count = None
+        # self.open_output_count = None
+        # self.holds_messages = True
+        self.current_depth = None
+        self.max_number_of_messages = None
+        self.max_message_length = None
+        self.inhibit_get = None
+        self.time_created = None
 
     def get_type_name(self):
         return TransmissionQueue.type_name
@@ -60,8 +70,8 @@ class AliasQueue(Queue):
     def __init__(self):
         super().__init__()
         self.target_queue_name = None
-        self.current_depth = 0
-        self.holds_messages = False
+        # self.current_depth = 0
+        # self.holds_messages = False
 
     def get_type_name(self):
         return AliasQueue.type_name
@@ -72,9 +82,15 @@ class LocalQueue(Queue):
 
     def __init__(self):
         super().__init__()
-        self.open_input_count = None
-        self.open_output_count = None
-        self.holds_messages = True
+        # self.open_input_count = None
+        # self.open_output_count = None
+        # self.holds_messages = True
+        self.current_depth = None
+        self.max_number_of_messages = None
+        self.max_message_length = None
+        self.inhibit_get = None
+        self.time_created = None
+
 
     def get_type_name(self):
         return LocalQueue.type_name

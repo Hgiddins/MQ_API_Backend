@@ -203,6 +203,7 @@ class Parser:
                 queue = AliasQueue()
                 queue.target_queue_name = queue_json['alias']['targetName']
                 queue.type_name = 'Alias'
+                queue.inhibit_get = queue_json['general']['inhibitGet']
             elif queue_type == 'remote':
                 queue = RemoteQueue()
                 queue.target_queue_name = queue_json['remote']['queueName']
@@ -213,41 +214,23 @@ class Parser:
                 if queue_json['general']['isTransmissionQueue']:
                     queue = TransmissionQueue()
                     queue.current_depth = queue_json['status']['currentDepth']
-                    queue.open_input_count = queue_json['status']['openInputCount']
-                    queue.open_output_count = queue_json['status']['openOutputCount']
+                    queue.max_number_of_messages = queue_json['storage']['maximumDepth']
+                    queue.max_message_length = queue_json['storage']['maximumMessageLength']
+                    queue.time_created = queue_json['timestamps']['created']
+                    queue.threshold = queue.current_depth / queue.max_number_of_messages
+                    queue.inhibit_get = queue_json['general']['inhibitGet']
                     queue.type_name = 'Transmission'
                 else:
                     queue = LocalQueue()
-                    queue.current_depth = queue_json['status']['currentDepth']
-                    queue.open_input_count = queue_json['status']['openInputCount']
-                    queue.open_output_count = queue_json['status']['openOutputCount']
+                    queue.current_depth = queue_json['status']['currentDepth']  # might break
+                    queue.max_number_of_messages = queue_json['storage']['maximumDepth']
+                    queue.max_message_length = queue_json['storage']['maximumMessageLength']
+                    queue.time_created = queue_json['timestamps']['created']
+                    queue.threshold = queue.current_depth / queue.max_number_of_messages
+                    queue.inhibit_get = queue_json['general']['inhibitGet']
                     queue.type_name = 'Local'
             else:
                 continue
-
-            if queue.type_name == 'Alias':
-                queue.current_depth = 0
-                queue.max_number_of_messages = 0
-                queue.max_message_length = 0
-                queue.time_created = 0
-                queue.threshold = 0
-                queue.inhibit_get = queue_json['general']['inhibitGet']
-
-            elif queue.type_name == 'Remote':
-                queue.current_depth = 0
-                queue.max_number_of_messages = 0
-                queue.max_message_length = 0
-                queue.time_created = 0
-                queue.threshold = 0
-                queue.inhibit_get = False
-
-            else:
-                queue.current_depth = queue_json['status']['currentDepth'] #might break
-                queue.max_number_of_messages = queue_json['storage']['maximumDepth']
-                queue.max_message_length = queue_json['storage']['maximumMessageLength']
-                queue.time_created = queue_json['timestamps']['created']
-                queue.threshold = queue.current_depth / queue.max_number_of_messages
-                queue.inhibit_get = queue_json['general']['inhibitGet']
 
             queue.queue_name = queue_json['name']
             queue.inhibit_put = queue_json['general']['inhibitPut']
