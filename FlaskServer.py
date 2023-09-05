@@ -290,14 +290,14 @@ class GetAllQueues(Resource):
 
         for queue in queues:
 
-            # Checking for custom queue threshold using the manager
-            if queueThresholdManager.contains(queue.queue_name):
-                currentQueueThreshold = queueThresholdManager.get(queue.queue_name)
-            else:
-                currentQueueThreshold = queueThresholdManager.defaultThreshold
-                queueThresholdManager.update({queue.queue_name: currentQueueThreshold})
-
             if queue.type_name == 'Local':
+                # Checking for custom queue threshold using the manager
+                if queueThresholdManager.contains(queue.queue_name):
+                    currentQueueThreshold = queueThresholdManager.get(queue.queue_name)
+                else:
+                    currentQueueThreshold = queueThresholdManager.defaultThreshold
+                    queueThresholdManager.update({queue.queue_name: currentQueueThreshold})
+
                 issue_msg = queueThresholdManager.thresholdWarning(queue, currentQueueThreshold)  # Call the thresholdWarning method of the Queue object
                 if issue_msg:
                     issue_list.add_issue(issue_msg)  # Directly add the issue message to the global issueLog

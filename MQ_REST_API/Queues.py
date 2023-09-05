@@ -39,8 +39,7 @@ class RemoteQueue(Queue):
         self.target_queue_name = None
         self.target_qmgr_name = None
         self.transmission_queue_name = None
-        # self.current_depth = 0
-        # self.holds_messages = False
+
 
     def get_type_name(self):
         return RemoteQueue.type_name
@@ -51,9 +50,6 @@ class TransmissionQueue(Queue):
 
     def __init__(self):
         super().__init__()
-        # self.open_input_count = None
-        # self.open_output_count = None
-        # self.holds_messages = True
         self.current_depth = None
         self.max_number_of_messages = None
         self.max_message_length = None
@@ -70,8 +66,6 @@ class AliasQueue(Queue):
     def __init__(self):
         super().__init__()
         self.target_queue_name = None
-        # self.current_depth = 0
-        # self.holds_messages = False
 
     def get_type_name(self):
         return AliasQueue.type_name
@@ -82,9 +76,6 @@ class LocalQueue(Queue):
 
     def __init__(self):
         super().__init__()
-        # self.open_input_count = None
-        # self.open_output_count = None
-        # self.holds_messages = True
         self.current_depth = None
         self.max_number_of_messages = None
         self.max_message_length = None

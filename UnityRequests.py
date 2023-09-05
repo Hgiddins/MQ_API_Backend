@@ -204,7 +204,7 @@ error_data = [
     {
         "mqobjectType": "application",
         "mqobjectName": "38C9D06400090040",
-        "issueCode" :"nuts"
+        "issueCode" : "nuts"
     }
 ]
 

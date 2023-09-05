@@ -238,8 +238,6 @@ class Parser:
             queue.time_altered = queue_json['timestamps']['altered']
             print(queue.queue_name, queue.type_name)
 
-
-
             queues.append(queue)
 
 
