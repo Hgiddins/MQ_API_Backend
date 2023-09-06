@@ -233,14 +233,16 @@ class IssueListResource(Resource):
 
         # After fetching, clear the issues from the issue list
         issue_list.clear_issues()
-        cache_contents = resolved_issues.cache._cache  # Accessing the internal dictionary of the simple cache
-        print('resolved issues list:', str(cache_contents))
+
         # Filter out issues that are in the 'resolved_issues' cache.
         unresolved_issues = []
         for issue in issues:
             cache_key = (issue['mqobjectName'], issue['issueCode'])
             if not resolved_issues.get(cache_key):
                 unresolved_issues.append(issue)
+                print('unresolved issue so will send:', issue)
+            else:
+                print('resolved issue so wont send:',issue)
 
         return {"issues": unresolved_issues}
 
