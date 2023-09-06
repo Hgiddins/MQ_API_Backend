@@ -151,7 +151,7 @@ class ClientConfig(Resource):
                 )
                 return {"message": "Login successful."}
                 # Wait for the Java application to set the login message.
-                java_login_event.wait(timeout=60)  # Here, timeout is 60 seconds.
+                java_login_event.wait(timeout=30)  # Here, timeout is 60 seconds.
 
                 response_message = java_login_message  # Store the message in a variable
 
