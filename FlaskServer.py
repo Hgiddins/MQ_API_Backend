@@ -51,6 +51,9 @@ chatbot = ThreadSafeChatbot()
 # Java Application Subprocess and Event
 process = None
 java_app_start_event = threading.Event()
+java_login_event = threading.Event()
+java_login_message = None
+
 
 #############################
 #      Java Utilities       #
@@ -84,7 +87,7 @@ signal.signal(signal.SIGINT, signal_handler)
 class ClientConfig(Resource):
 
     def post(self):
-        global qmgr, process, client
+        global qmgr, process, client, java_login_message
         data = request.get_json()
 
         # clear caches
@@ -148,8 +151,19 @@ class ClientConfig(Resource):
                     event = java_app_start_event
                 )
 
+                # Wait for the Java application to set the login message.
+                java_login_event.wait(timeout=60)  # Here, timeout is 60 seconds.
 
-                return {"message": "Login successful."}
+                response_message = java_login_message  # Store the message in a variable
+
+                java_login_message = None  # Reset the global variable for future use
+
+                java_login_event.clear()  # Reset the event for future use
+
+                if response_message == "Login successful":
+                    return {"message": "Login successful."}
+                else:
+                    return {"message": response_message}
             else:
                 return {"message": "Login failed, queue manager is not running."}
 
@@ -157,6 +171,37 @@ class ClientConfig(Resource):
             print(e)
             # catch the exception related to qmgr not existing.
             return {"message": f"Login failed, no queue manager named {data['qmgr']}."}
+
+
+############################################################################################################
+#                                          Java Login Feedback                                             #
+############################################################################################################
+
+class JavaLoginFeedback(Resource):
+
+    def post(self):
+        global java_login_message
+
+        data = request.get_json()
+
+        # Extract the message from the posted data
+        message = data.get('message')
+
+        if not message:
+            return {"error": "No message provided."}
+
+        java_login_message = message
+
+        # trigger the java login event
+        java_login_event = threading.Event()
+
+
+        if message == "Login successful":
+            print("Java application reported a successful login.")
+            return {"message": "Received successfully."}
+        else:
+            print(f"Java application reported an issue: {message}")
+            return {"message": "Received successfully."}
 
 
 ############################################################################################################
@@ -424,6 +469,8 @@ api.add_resource(QueueThresholdConfig, '/queueThresholdManager')
 api.add_resource(IssueListResource, '/issues')
 api.add_resource(Logout, "/logout")
 api.add_resource(ResolveIssue, '/resolve', '/check')
+api.add_resource(JavaLoginFeedback, '/java-login-feedback') # This will map the '/java-login-feedback' endpoint to the JavaLoginFeedback class
+
 
 
 ############################################################################################################
