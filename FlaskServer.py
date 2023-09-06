@@ -1,3 +1,8 @@
+import atexit
+import signal
+import os
+import sys
+import threading
 from flask import Flask, request, jsonify
 from flask_restful import Api, Resource
 from MQ_REST_API.DependencyGraph import DependencyGraph
@@ -6,6 +11,7 @@ import MQ_REST_API.MQ
 from ChatBot.MainChatBot import boot_chatbot, get_issue_message_chatbot_response, get_general_chatbot_response, ThreadSafeChatbot
 import urllib3
 from IssueLogging import ThreadsafeIssueList, QueueThresholdsConfig
+from JavaApp.BootJava import start_spring_app_with_properties
 
 
 #############################
@@ -42,7 +48,34 @@ client = None
 # retrieval_chain, conversation_chain = None, None
 chatbot = ThreadSafeChatbot()
 
+# Java Application Subprocess and Event
+process = None
+java_app_start_event = threading.Event()
 
+#############################
+#      Java Utilities       #
+#############################
+def terminate_spring_app():
+    if process:
+        process.terminate()
+        print("Java process terminated")
+    else:
+        print("No process to terminate")
+
+def wait_and_terminate():
+    java_app_start_event.wait()  # Wait until the Java app is started
+    terminate_spring_app()
+
+if not os.environ.get('WERKZEUG_RUN_MAIN'):
+    atexit.register(wait_and_terminate)
+
+
+def signal_handler(signum, frame):
+    terminate_spring_app()
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, signal_handler)
+signal.signal(signal.SIGINT, signal_handler)
 
 ############################################################################################################
 #                                           MQ REST API LOGIN                                              #
@@ -51,15 +84,15 @@ chatbot = ThreadSafeChatbot()
 class ClientConfig(Resource):
 
     def post(self):
-        global qmgr
+        global qmgr, process, client
         data = request.get_json()
 
         # clear caches
         resolved_issues.clear()
         cache.clear()
 
-        # Update global client details
-        global client
+        #shutoff maven app if it is running
+        terminate_spring_app()
 
         # Ensure all necessary fields are in the posted data
         required_fields = ["qmgr", "url", "username", "password"]
@@ -69,8 +102,12 @@ class ClientConfig(Resource):
             return {
                 "message": "Missing or invalid required fields. Ensure Url, Queue Manager, Username, and Password are all provided and not empty."}
         try:
-            client = MQ_REST_API.MQ.Client(url=data["url"], qmgr=data["qmgr"], username=data["username"],
-                                       password=data["password"])
+            url = data["url"]
+            qmgr = data["qmgr"]
+            username = data["username"]
+            password = data["password"]
+
+            client = MQ_REST_API.MQ.Client(url=url, qmgr=qmgr, username=username, password=password)
         except Exception as e:
             # Check if the exception message indicates a timeout
             if "timed out" in str(e):
@@ -86,9 +123,28 @@ class ClientConfig(Resource):
             qmgr_state = client.get_qmgr().state
 
             if qmgr_state == "running":
+                # SUCCESFULL LOG IN
 
+                # Boot a new chatbot with a fresh memory
                 print("booting a new chatbot")
                 chatbot.boot()
+
+                # Boot Java Spring application
+                print('booting Java application')
+                print(url, qmgr,username,password)
+
+
+
+                process = start_spring_app_with_properties(
+                    queue_manager=qmgr,
+                    channel="DEV.ADMIN.SVRCONN",
+                    conn_name="13.87.80.195(9443)",
+                    user=username,
+                    password=password,
+                    listener_auto_startup="false",
+                    event = java_app_start_event
+                )
+
 
                 return {"message": "Login successful."}
             else:
@@ -114,6 +170,7 @@ class Logout(Resource):
         cache.clear()  # Clear the cache
         issue_list.clear_issues()  # Clear the list of issues
         resolved_issues.clear()
+        wait_and_terminate() #terminate java app
 
         return {"message": "Logged out successfully."}
 
