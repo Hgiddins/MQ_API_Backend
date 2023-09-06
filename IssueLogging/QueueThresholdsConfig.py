@@ -4,7 +4,7 @@ import datetime
 class QueueThresholdManager:
     def __init__(self):
         self._thresholds = {}
-        self.defaultThreshold = 0.8
+        self.defaultThreshold = 80 #(%)
         self._lock = Lock()
 
     def update(self, new_thresholds):
@@ -40,7 +40,7 @@ class QueueThresholdManager:
         elif queue.threshold >= thresholdLimit:
             alert_template["issueCode"] = "Threshold_Exceeded"
             alert_template[
-                "generalDesc"] = f"The queue has exceeded the {thresholdLimit * 100}% threshold limit. Please take necessary actions to avoid potential issues."
+                "generalDesc"] = f"The queue has exceeded the {thresholdLimit}% threshold limit. Please take necessary actions to avoid potential issues."
         else:
             return None
 

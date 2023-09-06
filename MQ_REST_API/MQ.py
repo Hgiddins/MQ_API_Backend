@@ -216,7 +216,7 @@ class Parser:
                     queue.max_number_of_messages = queue_json['storage']['maximumDepth']
                     queue.max_message_length = queue_json['storage']['maximumMessageLength']
                     queue.time_created = queue_json['timestamps']['created']
-                    queue.threshold = queue.current_depth / queue.max_number_of_messages
+                    queue.threshold = (queue.current_depth / queue.max_number_of_messages) * 100
                     queue.inhibit_get = queue_json['general']['inhibitGet']
                     queue.type_name = 'Transmission'
                 else:
@@ -225,7 +225,7 @@ class Parser:
                     queue.max_number_of_messages = queue_json['storage']['maximumDepth']
                     queue.max_message_length = queue_json['storage']['maximumMessageLength']
                     queue.time_created = queue_json['timestamps']['created']
-                    queue.threshold = queue.current_depth / queue.max_number_of_messages
+                    queue.threshold = (queue.current_depth / queue.max_number_of_messages) * 100
                     queue.inhibit_get = queue_json['general']['inhibitGet']
                     queue.type_name = 'Local'
             else:

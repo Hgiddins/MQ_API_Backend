@@ -150,7 +150,7 @@ class ClientConfig(Resource):
                     listener_auto_startup="false",
                     event = java_app_start_event
                 )
-
+                return {"message": "Login successful."}
                 # Wait for the Java application to set the login message.
                 java_login_event.wait(timeout=60)  # Here, timeout is 60 seconds.
 
@@ -301,6 +301,9 @@ class QueueThresholdConfig(Resource):
                 "message": "Invalid threshold data. Ensure you provide a valid threshold (float) and queue name."
             }  # Return with bad request status
 
+        if not all(0 <= value <= 100 for value in data.values()):
+            return {"message": "Invalid threshold values. All thresholds should be between 0 and 100."}
+
         queueThresholdManager.update(data)  # Update the thresholds using the manager
 
         return {"message": "Thresholds updated successfully."}
@@ -395,7 +398,7 @@ class GetAllQueues(Resource):
 
         for queue in queues:
 
-            if queue.type_name == 'Local':
+            if queue.type_name == 'Local' or queue.type_name == 'Transmission':
                 # Checking for custom queue threshold using the manager
                 if queueThresholdManager.contains(queue.queue_name):
                     currentQueueThreshold = queueThresholdManager.get(queue.queue_name)

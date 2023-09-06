@@ -198,7 +198,9 @@ report_service = QMgrSystemReport(qmanager_name= qmgr, admin_channel=admin_chann
 
 # testing posting threshold data
 queue_threshold_config_payload = {
-    "DEV.QUEUE.5": 0.00
+    "DEV.QUEUE.5": 80,
+    "DEV.QUEUE.1": -70
+
 }
 report_service.post_queue_thresholds(queue_threshold_config_payload)
 report_service.get_queue_thresholds()
