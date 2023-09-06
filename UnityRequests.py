@@ -97,7 +97,7 @@ class QMgrSystemReport:
         """
         Posts threshold values to a given API endpoint.
         """
-        response = self.request_json("queueThresholdManager", method="POST", data=thresholds)
+        response = self.request_json("queuethresholdmanager", method="POST", data=thresholds)
         if response:
             print('Thresholds Posted:', response)
         else:
