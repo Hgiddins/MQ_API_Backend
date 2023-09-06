@@ -163,7 +163,7 @@ class ClientConfig(Resource):
                 if response_message == "Login successful":
                     return {"message": "Login successful."}
                 else:
-                    return {"message": response_message}
+                    return {"message": 'Spring login failed. Check channel and app port. Java says: '+ response_message}
             else:
                 return {"message": "Login failed, queue manager is not running."}
 
