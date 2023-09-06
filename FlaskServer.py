@@ -247,7 +247,7 @@ class QueueThresholdConfig(Resource):
 
     def post(self):
         data = request.get_json(force=True)  # This will ensure it doesn't fail even if content-type is not set
-
+        print('zaid,',data)
         if not data:
             return {"message": "No data provided."}  # Return with bad request status
 
