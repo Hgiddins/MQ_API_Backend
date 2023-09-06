@@ -196,8 +196,7 @@ class Parser:
         for queue_json in queue_response_json['queue']:
             if "SYSTEM" in queue_json['name'] or "ADMIN" in queue_json['name']:
                 continue
-            else:
-                print(queue_json['name'])
+
             queue_type = queue_json['type']
             if queue_type == 'alias':
                 queue = AliasQueue()
@@ -236,7 +235,7 @@ class Parser:
             queue.inhibit_put = queue_json['general']['inhibitPut']
             queue.description = queue_json['general']['description']
             queue.time_altered = queue_json['timestamps']['altered']
-            print(queue.queue_name, queue.type_name)
+
 
             queues.append(queue)
 

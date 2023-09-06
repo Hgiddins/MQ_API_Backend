@@ -95,17 +95,23 @@ class ClientConfig(Resource):
         terminate_spring_app()
 
         # Ensure all necessary fields are in the posted data
-        required_fields = ["qmgr", "url", "username", "password"]
+        required_fields = ["qmgr", "address", "username", "password", "admin_port", "admin_channel", "app_port"]
 
         # Check if all fields are present and they are not None or empty string
         if not all(field in data and data[field] not in [None, ""] for field in required_fields):
             return {
-                "message": "Missing or invalid required fields. Ensure Url, Queue Manager, Username, and Password are all provided and not empty."}
+                "message": "Missing or invalid required fields. Ensure all fields provided and not empty."}
         try:
-            url = data["url"]
+
+            address = data["address"]
+            admin_port = data["admin_port"]
+            admin_channel = data["admin_channel"]
+            app_port = data["app_port"]
             qmgr = data["qmgr"]
             username = data["username"]
             password = data["password"]
+
+            url = "https://" + address + ":" + admin_port
 
             client = MQ_REST_API.MQ.Client(url=url, qmgr=qmgr, username=username, password=password)
         except Exception as e:
@@ -119,26 +125,23 @@ class ClientConfig(Resource):
         cache.set('qmgr', data["qmgr"])
 
         try:
-            print(client.get_qmgr().state)
+            print("Qmgr is " + client.get_qmgr().state)
             qmgr_state = client.get_qmgr().state
 
             if qmgr_state == "running":
                 # SUCCESFULL LOG IN
+                print("Login succesfull")
 
                 # Boot a new chatbot with a fresh memory
-                print("booting a new chatbot")
+                print("Booting new chatbot")
                 chatbot.boot()
 
                 # Boot Java Spring application
-                print('booting Java application')
-                print(url, qmgr,username,password)
-
-
-
+                print('Booting Java application')
                 process = start_spring_app_with_properties(
                     queue_manager=qmgr,
-                    channel="DEV.ADMIN.SVRCONN",
-                    conn_name="13.87.80.195(9443)",
+                    channel= admin_channel,
+                    conn_name=address + "(" + admin_port + ")",
                     user=username,
                     password=password,
                     listener_auto_startup="false",

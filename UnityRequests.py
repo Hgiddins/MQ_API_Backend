@@ -8,23 +8,30 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 flask_endpoint = "https://127.0.0.1:5000/"
 
 # #
-base_url = "https://13.87.80.195:9443"
+address = "13.87.80.195"
+admin_port = "9443"
+app_port = "1414"
+admin_channel = "DEV.ADMIN.SVRCONN"
 qmgr = "QM1"
 username = "admin"
 password = "passw0rd"
 
 class QMgrSystemReport:
-    def __init__(self, qmanager_name, base_url, username, password):
+    def __init__(self, qmanager_name, address, admin_port, app_port, admin_channel, username, password):
         self.qmanager_name = qmanager_name
         self.queues = []
         self.applications = []
         self.channels = []
         self.dependency_graph = {}
-        self.post_client_config(base_url, qmanager_name, username, password)
+        self.post_client_config(address, admin_port, app_port, admin_channel, qmanager_name, username, password)
 
-    def post_client_config(self, url, qmgr, username, password):
+
+    def post_client_config(self, address, admin_port, app_port, admin_channel, qmgr, username, password):
         client_config = {
-            "url": url,
+            "address": address,
+            "admin_port": admin_port,
+            "app_port": app_port,
+            "admin_channel": admin_channel,
             "qmgr": qmgr,
             "username": username,
             "password": password
@@ -185,7 +192,7 @@ def measure_execution_time(func):
 
 
 # testing getting MQ API data
-report_service = QMgrSystemReport(qmanager_name= qmgr, base_url=base_url, username= username, password=password)
+report_service = QMgrSystemReport(qmanager_name= qmgr, admin_channel=admin_channel, address=address, admin_port=admin_port, app_port=app_port, username= username, password=password)
 # report_service.generate_report()
 
 
