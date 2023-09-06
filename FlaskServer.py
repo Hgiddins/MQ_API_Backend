@@ -469,7 +469,7 @@ api.add_resource(QueueThresholdConfig, '/queueThresholdManager')
 api.add_resource(IssueListResource, '/issues')
 api.add_resource(Logout, "/logout")
 api.add_resource(ResolveIssue, '/resolve', '/check')
-api.add_resource(JavaLoginFeedback, '/java-login-feedback') # This will map the '/java-login-feedback' endpoint to the JavaLoginFeedback class
+api.add_resource(JavaLoginFeedback, '/javaloginfeedback') # This will map the '/java-login-feedback' endpoint to the JavaLoginFeedback class
 
 
 
