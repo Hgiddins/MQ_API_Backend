@@ -240,9 +240,7 @@ class IssueListResource(Resource):
             cache_key = (issue['mqobjectName'], issue['issueCode'])
             if not resolved_issues.get(cache_key):
                 unresolved_issues.append(issue)
-                print('unresolved issue so will send:', issue)
-            else:
-                print('resolved issue so wont send:',issue)
+
 
         return {"issues": unresolved_issues}
 
