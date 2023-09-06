@@ -30,8 +30,7 @@ cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 
 resolved_issues = Cache(app, config={
-    'CACHE_TYPE': 'simple',
-    'CACHE_DEFAULT_TIMEOUT': 60  # 5 minutes in seconds
+    'CACHE_TYPE': 'simple'
 })
 
 
@@ -235,7 +234,7 @@ class IssueListResource(Resource):
         # After fetching, clear the issues from the issue list
         issue_list.clear_issues()
         cache_contents = resolved_issues.cache._cache  # Accessing the internal dictionary of the simple cache
-        print(str(cache_contents))
+        print('resolved issues list:', str(cache_contents))
         # Filter out issues that are in the 'resolved_issues' cache.
         unresolved_issues = []
         for issue in issues:
@@ -321,7 +320,7 @@ class ResolveIssue(Resource):
 
         # Create a unique key for this combination of mqobjectName and issueCode
         cache_key = (mqobject_name, issue_code)
-        resolved_issues.set(cache_key, True)
+        resolved_issues.set(cache_key, 'resolved', timeout=60)
 
         return {"message": "(mqobjectName, issueCode) pair added to resolved issues."}, 200
 
