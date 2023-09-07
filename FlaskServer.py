@@ -190,6 +190,7 @@ class JavaLoginFeedback(Resource):
             return {"error": "No message provided."}
 
         java_login_message = message
+        print(message)
 
         # trigger the java login event
         java_login_event = threading.Event()
