@@ -132,7 +132,7 @@ class ClientConfig(Resource):
 
             if qmgr_state == "running":
                 # SUCCESFULL LOG IN
-                print("Login succesfull")
+                print("Login successful")
 
                 # Boot a new chatbot with a fresh memory
                 print("Booting new chatbot")
