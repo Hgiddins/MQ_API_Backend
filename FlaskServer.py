@@ -143,7 +143,7 @@ class ClientConfig(Resource):
                 process = start_spring_app_with_properties(
                     queue_manager=qmgr,
                     channel= admin_channel,
-                    conn_name=address + "(" + admin_port + ")",
+                    conn_name=address + "(" + app_port + ")",
                     user=username,
                     password=password,
                     listener_auto_startup="false",
@@ -151,7 +151,9 @@ class ClientConfig(Resource):
                 )
                 # return {"message": "Login successful."}
                 # Wait for the Java application to set the login message.
+                print('waiting on java login event')
                 java_login_event.wait(timeout=30)  # Here, timeout is 60 seconds.
+                print('got past login event')
 
                 response_message = java_login_message  # Store the message in a variable
 
@@ -193,7 +195,7 @@ class JavaLoginFeedback(Resource):
         print(message)
 
         # trigger the java login event
-        java_login_event = threading.Event()
+        java_login_event.set()
 
 
         if message == "Login successful":

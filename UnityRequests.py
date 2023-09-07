@@ -107,7 +107,7 @@ class QMgrSystemReport:
         """
         Retrieves threshold values from a given API endpoint.
         """
-        response = self.request_json("queueThresholdManager", method="GET")
+        response = self.request_json("queuethresholdmanager", method="GET")
         if response:
             print('Retrieved Thresholds:', response)
         else:
