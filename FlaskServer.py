@@ -293,6 +293,8 @@ class QueueThresholdConfig(Resource):
     def get(self):
         with queueThresholdManager._lock:
             thresholds = queueThresholdManager._thresholds.copy() # Copy to ensure thread-safety while reading
+            thresholds = {key: {'Threshold': value} for key, value in thresholds.items()}
+            print(thresholds)
         return jsonify(thresholds)
 
     def post(self):
