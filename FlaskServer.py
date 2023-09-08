@@ -119,7 +119,7 @@ class ClientConfig(Resource):
         except Exception as e:
             # Check if the exception message indicates a timeout
             if "timed out" in str(e):
-                return {"message": "Connection timeout; check URL"}
+                return {"message": "Connection timeout; check Address and Admin Port"}
             else:
                 return {"message": f"Login failed, incorrect login details. Check Username and Password "}
 
