@@ -214,13 +214,14 @@ class JavaLoginFeedback(Resource):
 class Logout(Resource):
 
     def post(self):
-        global client, login_flag
+        global client, login_flag, java_login_message
 
         # Wipe data that might be sensitive or user-specific
         client = None  # Reset the MQ_REST_API client object
         cache.clear()  # Clear the cache
         issue_list.clear_issues()  # Clear the list of issues
         resolved_issues.clear()
+        java_login_message = None
         wait_and_terminate() #terminate java app
 
         return {"message": "Logged out successfully."}
