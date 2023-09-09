@@ -89,10 +89,11 @@ signal.signal(signal.SIGINT, signal_handler)
 class ClientConfig(Resource):
 
     def post(self):
-        global qmgr, process, client, java_login_message
+        global qmgr, process, client, java_login_message,java_config
         data = request.get_json()
 
         # clear caches
+        java_config = None
         resolved_issues.clear()
         cache.clear()
 
@@ -217,9 +218,10 @@ class JavaLoginFeedback(Resource):
 class Logout(Resource):
 
     def post(self):
-        global client, login_flag, java_login_message
+        global client, login_flag, java_login_message, java_config
 
         # Wipe data that might be sensitive or user-specific
+        java_config = None
         client = None  # Reset the MQ_REST_API client object
         cache.clear()  # Clear the cache
         issue_list.clear_issues()  # Clear the list of issues
