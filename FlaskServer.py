@@ -295,25 +295,29 @@ class IssueListResource(Resource):
 class QueueThresholdConfig(Resource):
     def get(self):
         global java_config
-        print('this is get config.')
+
         with queueThresholdManager._lock:
             thresholds = queueThresholdManager._thresholds.copy()  # Copy to ensure thread-safety while reading
-            thresholds = {key: {'Threshold': value} for key, value in thresholds.items()}
 
-        print('about to try get from java if i need to')
         if java_config == None:
             java_config = requests.get("https://localhost:8080/configurations", verify=False).text
-            print('Recieved config via Java.get/configurations:', java_config)
-
-
+            print('Received config via Java.get/configurations:', java_config)
 
         if isinstance(java_config, str):
             java_config = json.loads(java_config)
 
-        if 'queues' in java_config:
-            java_config['queues']['queueDepthThresholds'] = thresholds
+        activity_thresholds = java_config.get('queues', {}).get('queueActivityThresholds', {})
 
+        queue_thresholds = {}
+        for queue, depth in thresholds.items():
+            queue_thresholds[queue] = {
+                "depth": depth,
+                "activity": activity_thresholds.get(queue, 200)
+            }
 
+        java_config['queues']['queueThresholds'] = queue_thresholds
+        if 'queueActivityThresholds' in java_config['queues']:
+            del java_config['queues']['queueActivityThresholds']
 
         return java_config
 
