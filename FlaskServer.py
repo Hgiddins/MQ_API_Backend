@@ -314,13 +314,20 @@ class QueueThresholdConfig(Resource):
         # Get queue thresholds from java_config
         queue_thresholds = java_config['retrievedThresholds'].get('queues', {}).get('queueThresholds', {})
 
+        print('these are my thresholds', thresholds)
+
         # Update the queue thresholds using the provided data
         for queue, depth in thresholds.items():
             if queue in queue_thresholds:
                 queue_thresholds[queue]['depth'] = depth
+            else:
+                # If the queue doesn't exist, add it with given depth and a default activity of 200
+                queue_thresholds[queue] = {'depth': depth, 'activity': 200}
 
         # Update the main config
         java_config['retrievedThresholds']['queues']['queueThresholds'] = queue_thresholds
+
+        print('this is after appending', java_config)
 
         return java_config
 
