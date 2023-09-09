@@ -1,6 +1,8 @@
 import atexit
 import signal
+import json
 import os
+import requests
 import sys
 import threading
 from flask import Flask, request, jsonify
@@ -52,6 +54,7 @@ process = None
 java_app_start_event = threading.Event()
 java_login_event = threading.Event()
 java_login_message = None
+java_config = None
 
 
 #############################
@@ -291,29 +294,61 @@ class IssueListResource(Resource):
 
 class QueueThresholdConfig(Resource):
     def get(self):
+        global java_config
         with queueThresholdManager._lock:
-            thresholds = queueThresholdManager._thresholds.copy() # Copy to ensure thread-safety while reading
+            thresholds = queueThresholdManager._thresholds.copy()  # Copy to ensure thread-safety while reading
             thresholds = {key: {'Threshold': value} for key, value in thresholds.items()}
-            print(thresholds)
-        return jsonify(thresholds)
+
+
+        if java_config == None:
+            java_config = requests.get("https://localhost:8080/configurations", verify=False).text
+            print('Recieved config via Java.get/configurations:', java_config)
+
+
+
+        if isinstance(java_config, str):
+            java_config = json.loads(java_config)
+
+        if 'queues' in java_config:
+            java_config['queues']['queueDepthThresholds'] = thresholds
+
+
+
+        return java_config
 
     def post(self):
-        data = request.get_json(force=True)  # This will ensure it doesn't fail even if content-type is not set
+        global java_config
+        whole_config = request.get_json(force=True)
 
-        if not data:
-            return {"message": "No data provided."}  # Return with bad request status
+        if not whole_config:
+            return {"message": "No data provided."}
 
+        # Index into the queue depth thresholds and set them equal to data
+        data = whole_config.get('queues', {}).get('queueDepthThresholds', {})
+
+        # Delete the queueDepthThresholds in the whole_config
+        if 'queues' in whole_config and 'queueDepthThresholds' in whole_config['queues']:
+            del whole_config['queues']['queueDepthThresholds']
+
+        java_config = whole_config
+
+        # Check for the validity of the data (as you have already provided)
         if not all(isinstance(data[key], (int, float)) for key in data):
             return {
                 "message": "Invalid threshold data. Ensure you provide a valid threshold (float) and queue name."
-            }  # Return with bad request status
+            }
 
         if not all(0 <= value <= 100 for value in data.values()):
             return {"message": "Invalid threshold values. All thresholds should be between 0 and 100."}
 
         queueThresholdManager.update(data)  # Update the thresholds using the manager
 
-        return {"message": "Thresholds updated successfully."}
+        print('posting config to Java')
+        response = requests.post("https://127.0.0.1:8080/updateAppConfig", data=json.dumps(java_config),
+                                 headers={"Content-Type": "application/json"}, verify=False)
+        print('Java says:', response.text)
+
+        return {"message": "Configuration updated successfully."}
 
 
 class ResolveIssue(Resource):

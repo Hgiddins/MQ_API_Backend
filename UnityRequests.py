@@ -198,12 +198,29 @@ report_service = QMgrSystemReport(qmanager_name= qmgr, admin_channel=admin_chann
 
 # testing posting threshold data
 queue_threshold_config_payload = {
-    "DEV.QUEUE.5": 80,
-    "DEV.QUEUE.1": -70
-
+    "apps": {
+        "connThreshold": 100,  # Example value
+        "connOpRatioThreshold": 0.5,  # Example value
+        "minimumConns": 50  # Example value
+    },
+    "queue_manager": {
+        "errorThreshold": 10,  # Example value
+        "maxMQConns": 200,  # Example value
+        "maxMQOps": 1000  # Example value
+    },
+    "queues": {
+        "errorThreshold": 5,  # Example value
+        "queueActivityThresholds": {
+            "queue1": 10,  # Example values
+            "queue2": 20
+        },
+            "queueDepthThresholds": {
+            "queue1": 10,  # Example values
+            "queue2": 20
+        }
+    }
 }
-report_service.post_queue_thresholds(queue_threshold_config_payload)
-report_service.get_queue_thresholds()
+
 #
 # # *****testing getting the threshold issue******
 # # get another report so the issue will be triggered
@@ -228,6 +245,9 @@ report_service.post_resolved_issue(mqobject_name, issue_code)
 report_service.get_issues()
 
 report_service.get_queue_thresholds()
+report_service.post_queue_thresholds(queue_threshold_config_payload)
+report_service.get_queue_thresholds()
+
 
 
 
