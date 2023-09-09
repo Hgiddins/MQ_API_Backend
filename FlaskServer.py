@@ -344,8 +344,8 @@ class QueueThresholdConfig(Resource):
         data = {queue_name: queue_data.get('depth') for queue_name, queue_data in queue_thresholds_data.items()}
 
         print('data', data)
-        java_config = whole_config
-        print(java_config)
+
+
 
         # Check for the validity of the data
         if not all(isinstance(value, (int, float)) for value in data.values()):
@@ -362,6 +362,11 @@ class QueueThresholdConfig(Resource):
         response = requests.post("https://127.0.0.1:8080/updateConfig", data=json.dumps(java_config),
                                  headers={"Content-Type": "application/json"}, verify=False)
         print('Java says:', response.text)
+
+        if response.text == "Configuration updated successfully!":
+            java_config = whole_config
+        else:
+            return {"message": "Configuration not updated - check values."}
 
         return {"message": "Configuration updated successfully."}
 
