@@ -298,28 +298,29 @@ class QueueThresholdConfig(Resource):
     def get(self):
         global java_config
 
+        # Ensure the thresholds are read in a thread-safe manner
         with queueThresholdManager._lock:
-            thresholds = queueThresholdManager._thresholds.copy()  # Copy to ensure thread-safety while reading
+            thresholds = queueThresholdManager._thresholds.copy()
 
-        if java_config == None:
+        # If java_config is not already loaded, fetch it
+        if java_config is None:
             java_config = requests.get("https://localhost:8080/configurations", verify=False).text
             print('Received config via Java.get/configurations:', java_config)
 
+        # Ensure java_config is a dictionary
         if isinstance(java_config, str):
             java_config = json.loads(java_config)
 
-        activity_thresholds = java_config.get('queues', {}).get('queueActivityThresholds', {})
+        # Get queue thresholds from java_config
+        queue_thresholds = java_config['retrievedThresholds'].get('queues', {}).get('queueThresholds', {})
 
-        queue_thresholds = {}
+        # Update the queue thresholds using the provided data
         for queue, depth in thresholds.items():
-            queue_thresholds[queue] = {
-                "depth": depth,
-                "activity": activity_thresholds.get(queue, 200)
-            }
+            if queue in queue_thresholds:
+                queue_thresholds[queue]['depth'] = depth
 
-        java_config['queues']['queueThresholds'] = queue_thresholds
-        if 'queueActivityThresholds' in java_config['queues']:
-            del java_config['queues']['queueActivityThresholds']
+        # Update the main config
+        java_config['retrievedThresholds']['queues']['queueThresholds'] = queue_thresholds
 
         return java_config
 
@@ -330,19 +331,19 @@ class QueueThresholdConfig(Resource):
         if not whole_config:
             return {"message": "No data provided."}
 
-        # Index into the queue depth thresholds and set them equal to data
-        data = whole_config.get('queues', {}).get('queueDepthThresholds', {})
+        # Index into the queue thresholds and get the 'depth' values for each queue
+        queue_thresholds_data = whole_config.get('retrievedThresholds', {}).get('queues', {}).get('queueThresholds',
+                                                                                                   {})
+        data = {queue_name: queue_data.get('depth') for queue_name, queue_data in queue_thresholds_data.items()}
 
-        # Delete the queueDepthThresholds in the whole_config
-        if 'queues' in whole_config and 'queueDepthThresholds' in whole_config['queues']:
-            del whole_config['queues']['queueDepthThresholds']
-
+        print('data', data)
         java_config = whole_config
+        print(java_config)
 
-        # Check for the validity of the data (as you have already provided)
-        if not all(isinstance(data[key], (int, float)) for key in data):
+        # Check for the validity of the data
+        if not all(isinstance(value, (int, float)) for value in data.values()):
             return {
-                "message": "Invalid threshold data. Ensure you provide a valid threshold (float) and queue name."
+                "message": "Invalid threshold data. Ensure you provide a valid threshold (float) for each queue name."
             }
 
         if not all(0 <= value <= 100 for value in data.values()):
@@ -351,7 +352,7 @@ class QueueThresholdConfig(Resource):
         queueThresholdManager.update(data)  # Update the thresholds using the manager
 
         print('posting config to Java')
-        response = requests.post("https://127.0.0.1:8080/updateAppConfig", data=json.dumps(java_config),
+        response = requests.post("https://127.0.0.1:8080/updateConfig", data=json.dumps(java_config),
                                  headers={"Content-Type": "application/json"}, verify=False)
         print('Java says:', response.text)
 

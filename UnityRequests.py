@@ -198,27 +198,91 @@ report_service = QMgrSystemReport(qmanager_name= qmgr, admin_channel=admin_chann
 
 # testing posting threshold data
 queue_threshold_config_payload = {
+  "retrievedThresholds": {
     "apps": {
-        "connThreshold": 100,  # Example value
-        "connOpRatioThreshold": 0.5,  # Example value
-        "minimumConns": 50  # Example value
+      "connThreshold": 100,
+      "connOpRatioThreshold": 0.5,
+      "minimumConns": 50
     },
     "queue_manager": {
-        "errorThreshold": 10,  # Example value
-        "maxMQConns": 200,  # Example value
-        "maxMQOps": 1000  # Example value
+      "errorThreshold": 10,
+      "maxMQConns": 200,
+      "maxMQOps": 1000
     },
     "queues": {
-        "errorThreshold": 5,  # Example value
-        "queueActivityThresholds": {
-            "queue1": 10,  # Example values
-            "queue2": 20
+      "errorThreshold": 5,
+      "queueThresholds": {
+        "DEV.QUEUE.3": {
+          "depth": 80,
+          "activity": 200
         },
-            "queueDepthThresholds": {
-            "queue1": 10,  # Example values
-            "queue2": 20
+        "XMIT.TO.QM2": {
+          "depth": 80,
+          "activity": 200
+        },
+        "DEV.QUEUE.4": {
+          "depth": 80,
+          "activity": 200
+        },
+        "ORDER.RESPONSE": {
+          "depth": 80,
+          "activity": 200
+        },
+        "TEST.QUEUE.1": {
+          "depth": 80,
+          "activity": 200
+        },
+        "XMIT.TO.REMOTEQM": {
+          "depth": 80,
+          "activity": 200
+        },
+        "DEV.QUEUE.5": {
+          "depth": 80,
+          "activity": 200
+        },
+        "DEV.DEAD.LETTER.QUEUE": {
+          "depth": 80,
+          "activity": 200
+        },
+        "PUT.INHIBIT.QUEUE": {
+          "depth": 80,
+          "activity": 200
+        },
+        "DEV.QUEUE.1": {
+          "depth": 80,
+          "activity": 200
+        },
+        "MY.LOCAL.QUEUE": {
+          "depth": 80,
+          "activity": 200
+        },
+        "ORDER.REQUEST": {
+          "depth": 80,
+          "activity": 200
+        },
+        "INACCESSIBLE.QUEUE": {
+          "depth": 80,
+          "activity": 200
+        },
+        "XMIT.TO.QM3": {
+          "depth": 80,
+          "activity": 200
+        },
+        "DEV.QUEUE.2": {
+          "depth": 80,
+          "activity": 200
+        },
+        "queue1": {
+          "depth": 10,
+          "activity": 10
+        },
+        "queue2": {
+          "depth": 20,
+          "activity": 20
         }
+      }
     }
+  }
 }
 
 #
