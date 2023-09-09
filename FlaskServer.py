@@ -295,11 +295,12 @@ class IssueListResource(Resource):
 class QueueThresholdConfig(Resource):
     def get(self):
         global java_config
+        print('this is get config.')
         with queueThresholdManager._lock:
             thresholds = queueThresholdManager._thresholds.copy()  # Copy to ensure thread-safety while reading
             thresholds = {key: {'Threshold': value} for key, value in thresholds.items()}
 
-
+        print('about to try get from java if i need to')
         if java_config == None:
             java_config = requests.get("https://localhost:8080/configurations", verify=False).text
             print('Recieved config via Java.get/configurations:', java_config)
