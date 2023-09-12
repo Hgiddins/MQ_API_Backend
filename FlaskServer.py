@@ -93,6 +93,7 @@ class ClientConfig(Resource):
         data = request.get_json()
 
         # clear caches
+        print('CONFIG=', java_config)
         java_config = None
         resolved_issues.clear()
         cache.clear()
@@ -222,6 +223,7 @@ class Logout(Resource):
 
         # Wipe data that might be sensitive or user-specific
         java_config = None
+        print('CONFIG=', java_config)
         client = None  # Reset the MQ_REST_API client object
         cache.clear()  # Clear the cache
         issue_list.clear_issues()  # Clear the list of issues
@@ -298,6 +300,9 @@ class QueueThresholdConfig(Resource):
     def get(self):
         global java_config
 
+        print('CONFIG=', java_config)
+        if java_config:
+            print('THIS CONFIG WAS SOTRED FROM LAST TIME')
         # Ensure the thresholds are read in a thread-safe manner
         with queueThresholdManager._lock:
             thresholds = queueThresholdManager._thresholds.copy()
