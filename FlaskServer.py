@@ -107,6 +107,7 @@ class ClientConfig(Resource):
         set_java_config(None)
         resolved_issues.clear()
         cache.clear()
+        queueThresholdManager.clear_thresholds()
 
         #shutoff maven app if it is running
         terminate_spring_app()
@@ -240,6 +241,7 @@ class Logout(Resource):
         cache.clear()  # Clear the cache
         issue_list.clear_issues()  # Clear the list of issues
         resolved_issues.clear()
+        queueThresholdManager.clear_thresholds()
         java_login_message = None
         wait_and_terminate() #terminate java app
 

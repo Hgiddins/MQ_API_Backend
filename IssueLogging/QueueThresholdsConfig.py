@@ -19,6 +19,10 @@ class QueueThresholdManager:
         with self._lock:
             return queue_name in self._thresholds
 
+    def clear_thresholds(self):
+        with self._lock:
+            self._thresholds.clear()
+
 
     def thresholdWarning(self, queue, thresholdLimit):
         current_time = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')  # ISO 8601 format
