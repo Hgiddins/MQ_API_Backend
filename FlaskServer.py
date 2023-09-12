@@ -54,7 +54,17 @@ process = None
 java_app_start_event = threading.Event()
 java_login_event = threading.Event()
 java_login_message = None
+java_config_lock = threading.Lock()
 java_config = None
+
+def set_java_config(obj):
+    with java_config_lock:
+        global java_config
+        java_config = obj
+
+def get_java_config():
+    with java_config_lock:
+        return java_config
 
 
 #############################
@@ -93,8 +103,8 @@ class ClientConfig(Resource):
         data = request.get_json()
 
         # clear caches
-        print('CONFIG=', java_config)
-        java_config = None
+        print('CONFIG=', get_java_config())
+        set_java_config(None)
         resolved_issues.clear()
         cache.clear()
 
@@ -222,8 +232,9 @@ class Logout(Resource):
         global client, login_flag, java_login_message, java_config
 
         # Wipe data that might be sensitive or user-specific
-        java_config = None
-        print('CONFIG=', java_config)
+
+        set_java_config(None)
+        print('CONFIG=', get_java_config())
         client = None  # Reset the MQ_REST_API client object
         cache.clear()  # Clear the cache
         issue_list.clear_issues()  # Clear the list of issues
@@ -300,24 +311,26 @@ class QueueThresholdConfig(Resource):
     def get(self):
         global java_config
 
-        print('CONFIG=', java_config)
-        if java_config:
+
+        print('CONFIG=', get_java_config())
+        if get_java_config():
             print('THIS CONFIG WAS SOTRED FROM LAST TIME')
         # Ensure the thresholds are read in a thread-safe manner
         with queueThresholdManager._lock:
             thresholds = queueThresholdManager._thresholds.copy()
 
         # If java_config is not already loaded, fetch it
-        if java_config is None:
-            java_config = requests.get("https://localhost:8080/configurations", verify=False).text
-            print('Received config via Java.get/configurations:', java_config)
+        if get_java_config() is None:
+            set_java_config(requests.get("https://localhost:8080/configurations", verify=False).text)
+            print('Received config via Java.get/configurations:', get_java_config())
 
         # Ensure java_config is a dictionary
-        if isinstance(java_config, str):
-            java_config = json.loads(java_config)
+        if isinstance(get_java_config(), str):
+            x = get_java_config()
+            set_java_config(json.loads(x))
 
         # Get queue thresholds from java_config
-        queue_thresholds = java_config['retrievedThresholds'].get('queues', {}).get('queueThresholds', {})
+        queue_thresholds = get_java_config()['retrievedThresholds'].get('queues', {}).get('queueThresholds', {})
 
         for queue, depth in queue_thresholds.copy().items():
             if queue not in thresholds:
@@ -332,13 +345,13 @@ class QueueThresholdConfig(Resource):
                 # If the queue doesn't exist, add it with given depth and a default activity of 200
                 queue_thresholds[queue] = {'depth': depth, 'activity': 200}
 
-        print('here we had some issues with incorrect idexing', java_config)
         # Update the main config
-        java_config['retrievedThresholds']['queues']['queueThresholds'] = queue_thresholds
+        temp = get_java_config().copy()
+        temp['retrievedThresholds']['queues']['queueThresholds'] = queue_thresholds
+        set_java_config(temp)
 
-        print('this is after appending', java_config)
 
-        return java_config
+        return get_java_config()
 
     def post(self):
         global java_config
@@ -368,12 +381,12 @@ class QueueThresholdConfig(Resource):
         queueThresholdManager.update(data)  # Update the thresholds using the manager
 
         print('posting config to Java')
-        response = requests.post("https://127.0.0.1:8080/updateConfig", data=json.dumps(java_config),
+        response = requests.post("https://127.0.0.1:8080/updateConfig", data=json.dumps(get_java_config()),
                                  headers={"Content-Type": "application/json"}, verify=False)
         print('Java says:', response.text)
 
         if response.text == "Configuration updated successfully!":
-            java_config = whole_config
+            set_java_config(whole_config)
         else:
             return {"message": "Configuration not updated: "+ response.text}
 
