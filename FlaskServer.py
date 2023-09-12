@@ -324,6 +324,7 @@ class QueueThresholdConfig(Resource):
                 # If the queue doesn't exist, add it with given depth and a default activity of 200
                 queue_thresholds[queue] = {'depth': depth, 'activity': 200}
 
+        print('here we had some issues with incorrect idexing', java_config)
         # Update the main config
         java_config['retrievedThresholds']['queues']['queueThresholds'] = queue_thresholds
 
@@ -366,7 +367,7 @@ class QueueThresholdConfig(Resource):
         if response.text == "Configuration updated successfully!":
             java_config = whole_config
         else:
-            return {"message": "Configuration not updated - check values."}
+            return {"message": "Configuration not updated: "+ response.text}
 
         return {"message": "Configuration updated successfully."}
 
