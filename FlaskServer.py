@@ -235,7 +235,7 @@ class Logout(Resource):
 
         set_java_config(None)
         print('CONFIG=', get_java_config())
-        client = None  # Reset the MQ_REST_API client object
+        # client = None  # Reset the MQ_REST_API client object
         cache.clear()  # Clear the cache
         issue_list.clear_issues()  # Clear the list of issues
         resolved_issues.clear()
