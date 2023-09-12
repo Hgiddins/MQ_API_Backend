@@ -270,7 +270,7 @@ class Parser:
             channel.channelType = channelType
             channel.description = channel_params.get('desc', "")
             channel.maxMessageLength = channel_params.get('maxmsgl', "")
-            channel.heartbeatInterval = channel_params.get('hbint', "")
+            channel.heartbeatInterval = channel_params.get('hbint', 0)
             channel.transportType = channel_params.get('trptype', "")
 
             channels.append(channel)
