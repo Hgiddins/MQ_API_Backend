@@ -7,7 +7,6 @@ import sys
 import threading
 from flask import Flask, request, jsonify
 from flask_restful import Api, Resource
-from MQ_REST_API.DependencyGraph import DependencyGraph
 from flask_caching import Cache
 import MQ_REST_API.MQ
 from ChatBot.MainChatBot import boot_chatbot, get_issue_message_chatbot_response, get_general_chatbot_response, ThreadSafeChatbot
@@ -520,28 +519,6 @@ class GetAllChannels(Resource):
         return {'All_Channels': chs_as_dicts}
 
 
-class GetDependencyGraph(Resource):
-    def get(self):
-        qmgr = cache.get('qmgr')
-        channels = cache.get('all_channels')
-        if channels is None:
-            channels = client.get_all_channels()
-            cache.set('all_channels', channels)
-
-        applications = cache.get('all_applications')
-        if applications is None:
-            applications = client.get_all_applications()
-            cache.set('all_applications', applications)
-
-        queues = cache.get('all_queues')
-        if queues is None:
-            queues = client.get_all_queues()
-            cache.set('all_queues', queues)
-
-        graph = DependencyGraph()
-        graph.create_dependency_graph(queues, channels, applications, qmgr)
-        graph_as_dicts = graph.to_dict()
-        return {'Dependency Graph': graph_as_dicts}
 
 
 ############################################################################################################
@@ -553,7 +530,6 @@ api.add_resource(GetAllQueueManagers, '/getallqueuemanagers')
 api.add_resource(GetAllQueues, '/getallqueues')
 api.add_resource(GetAllApplications, '/getallapplications')
 api.add_resource(GetAllChannels, '/getallchannels')
-api.add_resource(GetDependencyGraph, '/getdependencygraph')
 api.add_resource(ChatBotQuery, '/chatbotquery')
 api.add_resource(QueueThresholdConfig, '/queuethresholdmanager')
 api.add_resource(IssueListResource, '/issues')
