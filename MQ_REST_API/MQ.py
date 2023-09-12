@@ -2,7 +2,7 @@ import requests
 import json
 from MQ_REST_API.Queues import RemoteQueue, TransmissionQueue, AliasQueue, LocalQueue
 from MQ_REST_API.QMGR import QueueManager
-from MQ_REST_API.Channel import SenderChannel, ReceiverChannel, ApplicationChannel
+from MQ_REST_API.Channel import Channel
 from MQ_REST_API.Messages import Message
 from MQ_REST_API.Application import Application, ConnectedObject
 
@@ -257,27 +257,24 @@ class Parser:
     def parse_channel_response(channel_response_json):
         channels = []
         for channel_json in channel_response_json['commandResponse']:
+            channel_params = channel_json['parameters']
+            channelType = channel_params.get('chltype', "")
 
-            channel_type = channel_json['parameters']['chltype']
-
-            # channel_name, channel_type, transmission_queue_name, connection_name)
-            if channel_type == 'SDR':
-                channel = SenderChannel()
-                channel.transmission_queue_name = channel_json['parameters']['xmitq']
-                channel.connection_name = channel_json['parameters']['conname']
-            elif channel_type == 'RCVR':
-                channel = ReceiverChannel()
-            elif channel_type == 'SVRCONN':
-                if channel_json['parameters']['channel'] not in ["CLOUD.APP.SVRCONN", "CLOUD.ADMIN.SVRCONN"]:
+            # You can add any specific logic to handle different types of channels, e.g.:
+            if channelType == 'AMQP':
                     continue
-                channel = ApplicationChannel()
-            else:
-                continue
 
-            channel.channel_name = channel_json['parameters']['channel']
-            channel.channel_type = channel_json['parameters']['chltype']
+            channel = Channel()
+
+            channel.channelName = channel_params.get('channel', "")
+            channel.channelType = channelType
+            channel.description = channel_params.get('desc', "")
+            channel.maxMessageLength = channel_params.get('maxmsgl', "")
+            channel.heartbeatInterval = channel_params.get('hbint', "")
+            channel.transportType = channel_params.get('trptype', "")
 
             channels.append(channel)
+
         return channels
 
 
