@@ -314,7 +314,7 @@ class QueueThresholdConfig(Resource):
         # Get queue thresholds from java_config
         queue_thresholds = java_config['retrievedThresholds'].get('queues', {}).get('queueThresholds', {})
 
-        for queue, depth in queue_thresholds.items():
+        for queue, depth in queue_thresholds.items().copy():
             if queue not in thresholds:
                 queue_thresholds.pop(queue)
 
