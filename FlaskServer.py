@@ -385,14 +385,13 @@ class QueueThresholdConfig(Resource):
         if not all(0 <= value <= 100 for value in data.values()):
             return {"message": "Invalid threshold values. All thresholds should be between 0 and 100."}
 
-        queueThresholdManager.update(data)  # Update the thresholds using the manager
-
         print('posting config to Java')
         response = requests.post("https://127.0.0.1:8080/updateConfig", data=json.dumps(get_java_config()),
                                  headers={"Content-Type": "application/json"}, verify=False)
         print('Java says:', response.text)
 
         if response.text == "Configuration updated successfully!":
+            queueThresholdManager.update(data)  # Update the thresholds using the manager
             set_java_config(whole_config)
         else:
             return {"message": "Configuration not updated: "+ response.text}
