@@ -181,8 +181,10 @@ class ClientConfig(Resource):
                 else:
                     terminate_spring_app()
                     if not response_message:
+                        print('Spring login failed. System Message: No Response')
                         return {"message": 'Spring login failed. System Message: No Response'}
                     else:
+                        print('Spring login failed. Check channel and app port. System Message: '+ response_message)
                         return {"message": 'Spring login failed. Check channel and app port. System Message: '+ response_message}
             else:
                 return {"message": "Login failed, queue manager is not running."}
