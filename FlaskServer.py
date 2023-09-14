@@ -171,7 +171,7 @@ class ClientConfig(Resource):
 
 
                 response_message = java_login_message  # Store the message in a variable
-
+                print('Java login message: ', java_login_message)
                 java_login_message = None  # Reset the global variable for future use
 
                 java_login_event.clear()  # Reset the event for future use
@@ -192,7 +192,7 @@ class ClientConfig(Resource):
         except Exception as e:
             print(e)
             # catch the exception related to qmgr not existing.
-            return {"message": f"Login failed, no queue manager named {data['qmgr']}."}
+            return {"message": f"Login failed: {e}"}
 
 
 ############################################################################################################
@@ -540,7 +540,7 @@ api.add_resource(QueueThresholdConfig, '/queuethresholdmanager')
 api.add_resource(IssueListResource, '/issues')
 api.add_resource(Logout, "/logout")
 api.add_resource(ResolveIssue, '/resolve', '/check')
-api.add_resource(JavaLoginFeedback, '/javaloginfeedback') # This will map the '/java-login-feedback' endpoint to the JavaLoginFeedback class
+api.add_resource(JavaLoginFeedback, '/javaloginfeedback')
 
 
 
