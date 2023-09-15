@@ -386,6 +386,7 @@ class QueueThresholdConfig(Resource):
             return {"message": "Invalid threshold values. All thresholds should be between 0 and 100."}
 
         print('posting config to Java')
+        print('SENDING TO JAVA THIS CONFIG,', json.dumps(get_java_config()))
         response = requests.post("https://127.0.0.1:8080/updateConfig", data=json.dumps(get_java_config()),
                                  headers={"Content-Type": "application/json"}, verify=False)
         print('Java says:', response.text)
