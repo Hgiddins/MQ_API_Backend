@@ -367,9 +367,6 @@ class QueueThresholdConfig(Resource):
         if not whole_config:
             return {"message": "No data provided."}
 
-        print('*******')
-        print('while config', whole_config)
-
         # Index into the queue thresholds and get the 'depth' values for each queue
         queue_thresholds_data = whole_config.get('retrievedThresholds', {}).get('queues', {}).get('queueThresholds',
                                                                                                    {})
@@ -387,7 +384,7 @@ class QueueThresholdConfig(Resource):
             return {"message": "Invalid threshold values. All thresholds should be between 0 and 100."}
 
         print('posting config to Java')
-        print('SENDING TO JAVA THIS CONFIG,', json.dumps(whole_config))
+
         response = requests.post("https://127.0.0.1:8080/updateConfig", data=json.dumps(whole_config),
                                  headers={"Content-Type": "application/json"}, verify=False)
         print('Java says:', response.text)
