@@ -78,7 +78,7 @@ def instantiate_retrieval_chain(index):
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     chain = ConversationalRetrievalChain.from_llm(
         llm=ChatOpenAI(temperature=0, model="gpt-3.5-turbo"),
-        retriever=index.vectorstore.as_retriever(search_kwargs={"k": 1}),
+        retriever=index.vectorstore.as_retriever(search_kwargs={"k": 3}),
         memory=memory
     )
     return chain
