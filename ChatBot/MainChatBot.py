@@ -117,7 +117,7 @@ def get_issue_message_chatbot_response(retrieval_chain, conversation_chain, issu
 
         documentation_context = retrieval_chain({"question": context_prompt})['answer']
 
-        troubleshoot_prompt = """System Prompt: \nYou are a helpful IBM MQ AI assistant. Given the context provided give an overview of the problem in my system and how to fix it (include IBM Documentation hyperlinks where possible). 
+        troubleshoot_prompt = """System Prompt: \nYou are a helpful IBM MQ AI assistant. Given the context provided give an overview of the problem in my system and how to fix it (include IBM Documentation hyperlinks where possible). Think step by step. 
         \nSystem Issue Message:\n""" + issue_information + "\n\nIBMMQ Documentation Reference:\n"+documentation_context
 
         result = conversation_chain.predict(input=troubleshoot_prompt)
@@ -148,17 +148,4 @@ def get_general_chatbot_response(retrieval_chain, conversation_chain, user_query
         # Capture and return the error message
         return str(e)
 
-
-
-
-# # testing
-# retrieval_chain, conversation_chain = boot_chatbot()
-# question = "what is a 2035 issue?"
-# objects = "none"
-#
-# print(get_issue_message_chatbot_response(retrieval_chain, conversation_chain, question, objects))
-# question = "Who is barack obama"
-# print(get_general_chatbot_response(retrieval_chain, conversation_chain, question))
-# question = "When was he born"
-# print(get_general_chatbot_response(retrieval_chain, conversation_chain, question))
 
