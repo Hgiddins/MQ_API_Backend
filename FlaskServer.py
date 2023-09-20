@@ -8,9 +8,11 @@ import threading
 from flask import Flask, request, jsonify
 from flask_restful import Api, Resource
 from flask_caching import Cache
+import urllib3
+
+# CUSTOM MODULES
 import MQ_REST_API.MQ
 from ChatBot.MainChatBot import boot_chatbot, get_issue_message_chatbot_response, get_general_chatbot_response, ThreadSafeChatbot
-import urllib3
 from IssueLogging import ThreadsafeIssueList, QueueThresholdsConfig
 from JavaApp.BootJava import start_spring_app_with_properties
 
@@ -545,7 +547,6 @@ api.add_resource(JavaLoginFeedback, '/javaloginfeedback')
 ############################################################################################################
 #                                       Run, Certificate, Threading                                        #
 ############################################################################################################
-
 
 
 if __name__ == "__main__":
