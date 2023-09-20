@@ -113,11 +113,14 @@ def boot_chatbot():
 def get_issue_message_chatbot_response(retrieval_chain, conversation_chain, issue_information):
     try:
         # get relevant related information from the documentation
-        context_prompt = "Provide relevant information about the causes and possible solutions to this issue (include IBM Documentation hyperlinks where possible): " + issue_information
+        context_prompt = """[Context: IBM MQ] \n\n System Prompt: \nProvide relevant information about the causes and 
+        possible solutions to this issue (include IBM Documentation hyperlinks where possible): """ + issue_information
 
         documentation_context = retrieval_chain({"question": context_prompt})['answer']
 
-        troubleshoot_prompt = """System Prompt: \nYou are a helpful IBM MQ AI assistant. Given the context provided give an overview of the problem in my system and how to fix it (include IBM Documentation hyperlinks where possible). Think step by step. 
+        troubleshoot_prompt = """System Prompt: \nYou are a helpful IBM MQ AI assistant. Given the context provided 
+        give an overview of the problem in my system and how to fix it (include IBM Documentation hyperlinks where 
+        possible). Think step by step. 
         \nSystem Issue Message:\n""" + issue_information + "\n\nIBMMQ Documentation Reference:\n"+documentation_context
 
         result = conversation_chain.predict(input=troubleshoot_prompt)
@@ -132,12 +135,15 @@ def get_issue_message_chatbot_response(retrieval_chain, conversation_chain, issu
 def get_general_chatbot_response(retrieval_chain, conversation_chain, user_query):
     try:
         # get relevant related information from the documentation
-        context_prompt = """[Context: IBM MQ] \n\n System Prompt: \nIf the user's query relates to 'IBM MQ', answer informatively. For unrelated queries, reply with 'No information'.
+        context_prompt = """[Context: IBM MQ] \n\n System Prompt: \nIf the user's query relates to 'IBM MQ', answer 
+        informatively. For unrelated queries, reply with 'No information'. Think step by step.
         \nUser Prompt:\n""" + user_query
 
         documentation_context = retrieval_chain({"question": context_prompt})['answer']
 
-        troubleshoot_prompt = """System Prompt: \nYou are a helpful IBM MQ AI assistant. If the user's query relates to 'IBM MQ', use the IBM MQ Documentation to answer informatively. For queries not about IBM MQ or general pleasantries, reply that the question does not relate to IBM MQ and so you cannot answer it. 
+        troubleshoot_prompt = """System Prompt: \nYou are a helpful IBM MQ AI assistant. If the user's query relates to 
+        'IBM MQ', use the IBM MQ Documentation to answer informatively. For queries not about IBM MQ or general 
+        pleasantries, reply that the question does not relate to IBM MQ and so you cannot answer it. Think step by step.
         \nUser Prompt:\n""" + user_query + "\n\nIBM MQ Documentation Reference:\n" + documentation_context
 
         result = conversation_chain.predict(input=troubleshoot_prompt)
