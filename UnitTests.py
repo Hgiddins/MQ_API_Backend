@@ -338,17 +338,17 @@ class TestFlaskServer(unittest.TestCase):
         self.report_service.get_all_channels()
         self.assertTrue(self.report_service.channels)
 
-    def test_post_queue_thresholds(self):
+    def test_02_post_queue_thresholds(self):
         thresholds = queue_threshold_config_payload
         response = self.report_service.post_queue_thresholds(thresholds)
         # Assuming there is a 'message' key in the response for successful post
         self.assertEqual({'message': 'Configuration updated successfully.'}, response)
 
-    def test_get_queue_thresholds(self):
+    def test_03_get_queue_thresholds(self):
         response = self.report_service.get_queue_thresholds()
         self.assertIsNotNone(response)
 
-    def test_02_post_issue(self):
+    def test_04_post_issue(self):
         response = self.report_service.post_issue([{'issueCode': 'Threshold_Exceeded',
                                                     'startTimeStamp': '2023-09-26T15:32:01',
                                                     'generalDesc': 'The queue has exceeded the 0% threshold limit. Please take necessary actions to avoid potential issues.',
@@ -359,14 +359,23 @@ class TestFlaskServer(unittest.TestCase):
 
         self.assertEqual(response, {'message': '1 issues added successfully!'})
 
-    def test_03_get_issues(self):
+    def test_05_get_issues(self):
         response = self.report_service.get_issues()
         self.assertIsNotNone(response)
 
     def test_post_resolved_issue(self):
-        # Post an issue first
-        self.report_service.post_issue(error_data[0])
-        self.report_service.post_resolved_issue(error_data[0]['mqobjectName'], error_data[0]['issueCode'])
+        issue = {'issueCode': 'Threshold_Exceeded',
+                                         'startTimeStamp': '2023-09-26T15:32:01',
+                                         'generalDesc': 'The queue has exceeded the 0% threshold limit. Please take necessary actions to avoid potential issues.',
+                                         'technicalDetails': {'maxThreshold': '0'},
+                                         'mqobjectType': '<QUEUE>',
+                                         'mqobjectName': 'INACCESSIBLE.QUEUE',
+                                         'objectDetails': "{'queue_name': 'INACCESSIBLE.QUEUE', 'type_name': 'Local', 'inhibit_put': False, 'description': '', 'time_altered': '2023-07-25T16:06:56.000Z', 'current_depth': 0, 'max_number_of_messages': 5000, 'max_message_length': 4194304, 'inhibit_get': False, 'time_created': '2023-07-25T16:06:56.000Z', 'threshold': 0.0}"}
+
+        self.report_service.post_issue([issue])
+        self.report_service.post_resolved_issue('INACCESSIBLE.QUEUE', 'Threshold_Exceeded')
+        response = self.report_service.get_issues()
+        self.assertNotIn(issue, response['issues'])
         # Make an assertion here depending on how resolved issues are marked
 
 
