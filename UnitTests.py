@@ -326,29 +326,29 @@ class TestFlaskServer(unittest.TestCase):
         self.assertIsNotNone(response)
         self.assertEqual(response, {'message': 'Login successful.'})
 
-    def test_get_all_queues(self):
+    def test_02_get_all_queues(self):
         self.report_service.get_all_queues()
         self.assertTrue(self.report_service.queues)
 
-    def test_get_all_applications(self):
+    def test_03_get_all_applications(self):
         self.report_service.get_all_applications()
         self.assertTrue(self.report_service.applications)
 
-    def test_get_all_channels(self):
+    def test_04_get_all_channels(self):
         self.report_service.get_all_channels()
         self.assertTrue(self.report_service.channels)
 
-    def test_02_post_queue_thresholds(self):
+    def test_05_post_queue_thresholds(self):
         thresholds = queue_threshold_config_payload
         response = self.report_service.post_queue_thresholds(thresholds)
         # Assuming there is a 'message' key in the response for successful post
         self.assertEqual({'message': 'Configuration updated successfully.'}, response)
 
-    def test_03_get_queue_thresholds(self):
+    def test_06_get_queue_thresholds(self):
         response = self.report_service.get_queue_thresholds()
         self.assertIsNotNone(response)
 
-    def test_04_post_issue(self):
+    def test_07_post_issue(self):
         response = self.report_service.post_issue([{'issueCode': 'Threshold_Exceeded',
                                                     'startTimeStamp': '2023-09-26T15:32:01',
                                                     'generalDesc': 'The queue has exceeded the 0% threshold limit. Please take necessary actions to avoid potential issues.',
@@ -359,11 +359,11 @@ class TestFlaskServer(unittest.TestCase):
 
         self.assertEqual(response, {'message': '1 issues added successfully!'})
 
-    def test_05_get_issues(self):
+    def test_08_get_issues(self):
         response = self.report_service.get_issues()
         self.assertIsNotNone(response)
 
-    def test_post_resolved_issue(self):
+    def test_09_post_resolved_issue(self):
         issue = {'issueCode': 'Threshold_Exceeded',
                                          'startTimeStamp': '2023-09-26T15:32:01',
                                          'generalDesc': 'The queue has exceeded the 0% threshold limit. Please take necessary actions to avoid potential issues.',
@@ -377,6 +377,20 @@ class TestFlaskServer(unittest.TestCase):
         response = self.report_service.get_issues()
         self.assertNotIn(issue, response['issues'])
         # Make an assertion here depending on how resolved issues are marked
+
+    def test_10_system_message_query(self):
+        system_query = "How to resolve 'Threshold_Exceeded' issue?"
+        response = post_chatbot_query_and_get_response(system_query, "systemMessage")
+        self.assertIsNotNone(response, "Response is None for system message query.")
+        self.assertIn('message', response, "No 'answer' key in the response.")
+        self.assertIn('https', response['message'], "Didn't provide documentation hyperlink. ")
+
+    def test_11_general_usage_query(self):
+        general_query = "Who is Obama?"
+        response = post_chatbot_query_and_get_response(general_query, "userMessage")
+        self.assertIsNotNone(response, "Response is None for general usage query.")
+        print(response)
+        self.assertIn('relate to IBM MQ', response['message'], "Didn't give default message. ")
 
 
 # If the script is executed directly, run the tests
