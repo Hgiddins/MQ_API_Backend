@@ -7,8 +7,8 @@
 # the key is the name of the entity and the value is a list of entities
 # that directly/indirectly relates to the key entity.
 
-from MQ_REST_API.Queues import RemoteQueue,  AliasQueue
-from MQ_REST_API.Channel import SenderChannel
+from MQRestAPI.Queues import RemoteQueue,  AliasQueue
+from MQRestAPI.Channel import SenderChannel
 
 
 class DependencyGraph:

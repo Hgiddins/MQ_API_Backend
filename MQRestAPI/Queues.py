@@ -10,16 +10,9 @@ class Queue(ABC):
     def __init__(self):
         self.queue_name = None
         self.type_name = None
-
         self.inhibit_put = None
-
         self.description = None
-
         self.time_altered = None
-
-
-
-
     @abstractmethod
     def get_type_name(self):
         pass

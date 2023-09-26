@@ -24,7 +24,7 @@ issue_msg = """
         "openOptions": 14352,
         "userIdentifier": "app",
         "applicationType": 6,
-        "applicationName": "IBM MQ_REST_API"
+        "applicationName": "IBM MQRestAPI"
     }
 }
 """

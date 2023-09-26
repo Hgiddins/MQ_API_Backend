@@ -11,7 +11,7 @@ from flask_caching import Cache
 import urllib3
 
 # CUSTOM MODULES
-import MQ_REST_API.MQ
+import MQRestAPI.MQ
 from ChatBot.MainChatBot import boot_chatbot, get_issue_message_chatbot_response, get_general_chatbot_response, ThreadSafeChatbot
 from IssueLogging import ThreadsafeIssueList, QueueThresholdsConfig
 from JavaApp.BootJava import start_spring_app_with_properties
@@ -43,7 +43,7 @@ queueThresholdManager = QueueThresholdsConfig.QueueThresholdManager()
 # Logging of issues - threadsafe
 issue_list = ThreadsafeIssueList.ThreadSafeIssueList()
 
-# global client, must first be posted to for MQ_REST_API to work
+# global client, must first be posted to for MQRestAPI to work
 client = None
 
 # Chat Bot connection and instantiation
@@ -132,7 +132,7 @@ class ClientConfig(Resource):
 
             url = "https://" + address + ":" + admin_port
 
-            client = MQ_REST_API.MQ.Client(url=url, qmgr=qmgr, username=username, password=password)
+            client = MQRestAPI.MQ.Client(url=url, qmgr=qmgr, username=username, password=password)
         except Exception as e:
             # Check if the exception message indicates a timeout
             if "timed out" in str(e):
@@ -242,7 +242,7 @@ class Logout(Resource):
 
         set_java_config(None)
         print('CONFIG=', get_java_config())
-        # client = None  # Reset the MQ_REST_API client object
+        # client = None  # Reset the MQRestAPI client object
         # post
         cache.clear()  # Clear the cache
         issue_list.clear_issues()  # Clear the list of issues
@@ -323,7 +323,7 @@ class QueueThresholdConfig(Resource):
 
         print('CONFIG=', get_java_config())
         if get_java_config():
-            print('THIS CONFIG WAS SOTRED FROM LAST TIME')
+            print('THIS CONFIG WAS STORED FROM LAST TIME')
         # Ensure the thresholds are read in a thread-safe manner
         with queueThresholdManager._lock:
             thresholds = queueThresholdManager._thresholds.copy()
@@ -494,10 +494,10 @@ class GetAllQueues(Resource):
                 if queueThresholdManager.contains(queue.queue_name):
                     currentQueueThreshold = queueThresholdManager.get(queue.queue_name)
                 else:
-                    currentQueueThreshold = queueThresholdManager.defaultThreshold
+                    currentQueueThreshold = queueThresholdManager.defaultThreshold #set to default value of 80%
                     queueThresholdManager.update({queue.queue_name: currentQueueThreshold})
 
-                issue_msg = queueThresholdManager.thresholdWarning(queue, currentQueueThreshold)  # Call the thresholdWarning method of the Queue object
+                issue_msg = queueThresholdManager.thresholdWarning(queue, currentQueueThreshold) #check thresholdWarning
                 if issue_msg:
                     issue_list.add_issue(issue_msg)  # Directly add the issue message to the global issueLog
             queues_as_dicts.append(queue.to_dict())
