@@ -24,7 +24,7 @@ class QMgrSystemReport:
         self.applications = []
         self.channels = []
         self.dependency_graph = {}
-        self.post_client_config(address, admin_port, app_port, admin_channel, qmanager_name, username, password)
+        # self.post_client_config(address, admin_port, app_port, admin_channel, qmanager_name, username, password)
 
 
     def post_client_config(self, address, admin_port, app_port, admin_channel, qmgr, username, password):
@@ -37,7 +37,9 @@ class QMgrSystemReport:
             "username": username,
             "password": password
         }
-        print(self.request_json("clientconfig", method="POST", data=client_config))
+        result = self.request_json("clientconfig", method="POST", data=client_config)
+        print(result)
+        return result
 
 
     def request_json(self, url, method="GET", data=None):
@@ -68,24 +70,28 @@ class QMgrSystemReport:
         if response:
             self.queues = response.get('All_Queues', [])
             print('Queues', self.queues)
+        return response
 
     def get_all_applications(self):
         response = self.request_json("getallapplications")
         if response:
             self.applications = response.get('All_Applications', [])
             print('Applications', self.applications)
+        return response
 
     def get_all_channels(self):
         response = self.request_json("getallchannels")
         if response:
             self.channels = response.get('All_Channels', [])
             print('Channels', self.channels)
+        return response
 
     def get_dependency_graph(self):
         response = self.request_json("getdependencygraph")
         if response:
             self.dependency_graph = response.get('Dependency Graph', {})
             print('Dependency Graph', self.dependency_graph)
+        return response
 
     def generate_report(self):
         print('Generating report for ', qmgr, "\n")
@@ -103,6 +109,7 @@ class QMgrSystemReport:
             print('Thresholds Posted:', response)
         else:
             print("Failed to post queue thresholds.")
+        return response
 
     def get_queue_thresholds(self):
         """
@@ -113,6 +120,7 @@ class QMgrSystemReport:
             print('Retrieved Thresholds:', response)
         else:
             print("Failed to retrieve queue thresholds.")
+        return response
 
     def get_issues(self):
         """
@@ -123,6 +131,7 @@ class QMgrSystemReport:
             print('Issues:', response)
         else:
             print("Failed to retrieve issues.")
+        return response
 
     def post_issue(self,issue_data):
         """
@@ -131,6 +140,7 @@ class QMgrSystemReport:
         response = self.request_json("issues", method="POST",
                                 data=issue_data)  # replace 'your_error_endpoint' with your actual endpoint
         print(response)
+        return response
 
     def post_resolved_issue(self, mqobject_name, issue_code):
         """
@@ -142,6 +152,7 @@ class QMgrSystemReport:
         }
         response = self.request_json("resolve", method="POST", data=data)
         print(response)
+        return response
 
 
 
@@ -167,6 +178,7 @@ def post_chatbot_query_and_get_response(query, indicator):
         "question": query,
         "indicator": indicator
     }
+
     post_response = request_json("chatbotquery", method="POST", data=data)
     print(post_response)
 
@@ -294,10 +306,9 @@ error_data = [
     }
 ]
 
-
 class TestFlaskServer(unittest.TestCase):
+
     def setUp(self):
-        # Set up any prerequisites here, if needed
         self.report_service = QMgrSystemReport(
             qmanager_name=qmgr,
             admin_channel=admin_channel,
@@ -308,22 +319,57 @@ class TestFlaskServer(unittest.TestCase):
             password=password
         )
 
-    def test_post_client_config(self):
-        # Example test for post_client_config
+    def test_01_post_client_config(self):
         response = self.report_service.post_client_config(
             address, admin_port, app_port, admin_channel, qmgr, username, password
         )
-        self.assertIsNotNone(response)  # Replace this with any relevant assertions
+        self.assertIsNotNone(response)
+        self.assertEqual(response, {'message': 'Login successful.'})
 
     def test_get_all_queues(self):
-        # Example test for get_all_queues
         self.report_service.get_all_queues()
-        self.assertTrue(self.report_service.queues)  # Assert that queues are not empty
+        self.assertTrue(self.report_service.queues)
 
-    # ... add more tests as needed ...
+    def test_get_all_applications(self):
+        self.report_service.get_all_applications()
+        self.assertTrue(self.report_service.applications)
+
+    def test_get_all_channels(self):
+        self.report_service.get_all_channels()
+        self.assertTrue(self.report_service.channels)
+
+    def test_post_queue_thresholds(self):
+        thresholds = queue_threshold_config_payload
+        response = self.report_service.post_queue_thresholds(thresholds)
+        # Assuming there is a 'message' key in the response for successful post
+        self.assertEqual({'message': 'Configuration updated successfully.'}, response)
+
+    def test_get_queue_thresholds(self):
+        response = self.report_service.get_queue_thresholds()
+        self.assertIsNotNone(response)
+
+    def test_02_post_issue(self):
+        response = self.report_service.post_issue([{'issueCode': 'Threshold_Exceeded',
+                                                    'startTimeStamp': '2023-09-26T15:32:01',
+                                                    'generalDesc': 'The queue has exceeded the 0% threshold limit. Please take necessary actions to avoid potential issues.',
+                                                    'technicalDetails': {'maxThreshold': '0'},
+                                                    'mqobjectType': '<QUEUE>',
+                                                    'mqobjectName': 'INACCESSIBLE.QUEUE',
+                                                    'objectDetails': "{'queue_name': 'INACCESSIBLE.QUEUE', 'type_name': 'Local', 'inhibit_put': False, 'description': '', 'time_altered': '2023-07-25T16:06:56.000Z', 'current_depth': 0, 'max_number_of_messages': 5000, 'max_message_length': 4194304, 'inhibit_get': False, 'time_created': '2023-07-25T16:06:56.000Z', 'threshold': 0.0}"}])
+
+        self.assertEqual(response, {'message': '1 issues added successfully!'})
+
+    def test_03_get_issues(self):
+        response = self.report_service.get_issues()
+        self.assertIsNotNone(response)
+
+    def test_post_resolved_issue(self):
+        # Post an issue first
+        self.report_service.post_issue(error_data[0])
+        self.report_service.post_resolved_issue(error_data[0]['mqobjectName'], error_data[0]['issueCode'])
+        # Make an assertion here depending on how resolved issues are marked
+
 
 # If the script is executed directly, run the tests
 if __name__ == "__main__":
     unittest.main()
-
-
